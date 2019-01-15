@@ -13,10 +13,9 @@ public class ProfilesDbHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + ProfilesContract.Profiles.TABLE_NAME + " (" +
                     ProfilesContract.Profiles._ID + " INTEGER PRIMARY KEY," +
                     ProfilesContract.Profiles.COLUMN_NAME_NAME + " TEXT," +
-                    ProfilesContract.Profiles.COLUMN_NAME_AUDIO_FORMAT + " TEXT," +
-                    ProfilesContract.Profiles.COLUMN_NAME_AUDIO_DETAILS + " TEXT," +
                     ProfilesContract.Profiles.COLUMN_NAME_SOURCE_FOLDER + " TEXT," +
                     ProfilesContract.Profiles.COLUMN_NAME_FILE_HANDLING + " TEXT," +
+                    ProfilesContract.Profiles.COLUMN_NAME_AUDIO_FORMAT + " TEXT," +
                     ProfilesContract.Profiles.COLUMN_NAME_IS_DEFAULT + " TEXT)";
 
     private static final String SQL_DELETE_ENTRIES =

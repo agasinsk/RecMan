@@ -157,6 +157,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
     public void onSaveProfile(String sourceFolder, String fileHandling, String audioFormat, String audioDetails) {
         //TODO: save profile in db
 
-        Log.i(RECMAN_TAG, "Profile is saving!");
+        Log.i(RECMAN_TAG, "Profile is saving!" + sourceFolder);
     }
 }

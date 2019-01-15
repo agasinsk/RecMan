@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import cafe.adriel.androidaudioconverter.model.AudioFormat;
 
@@ -38,7 +39,6 @@ public class HomeFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-
      * @return A new instance of fragment HomeFragment.
      */
     public static HomeFragment newInstance() {
@@ -58,7 +58,7 @@ public class HomeFragment extends Fragment {
         fragmentView = inflater.inflate(R.layout.fragment_home, container, false);
 
         // Setup source folder selection
-        Button selectFolderButton = fragmentView.findViewById(R.id.folderButton);
+        final Button selectFolderButton = fragmentView.findViewById(R.id.folderButton);
         selectFolderButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,7 +67,7 @@ public class HomeFragment extends Fragment {
         });
 
         /* Setup spinner for audio formats */
-        Spinner spinner = fragmentView.findViewById(R.id.audioFormatSpinner);
+        final Spinner spinner = fragmentView.findViewById(R.id.audioFormatSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.audio_formats, android.R.layout.simple_spinner_item);
 
@@ -75,13 +75,38 @@ public class HomeFragment extends Fragment {
 
         spinner.setAdapter(adapter);
 
-        // Setup spinner for audio formats
-        Spinner destinationSpinner = fragmentView.findViewById(R.id.destinationSpinner);
+        /* Setup spinner for file handling */
+        final Spinner fileHandlingSpinner = fragmentView.findViewById(R.id.fileHandlingSpinner);
+        ArrayAdapter<CharSequence> fileHandlingsAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.file_handlings, android.R.layout.simple_spinner_item);
+        fileHandlingsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        fileHandlingSpinner.setAdapter(fileHandlingsAdapter);
+
+        // Setup spinner for destination
+        final Spinner destinationSpinner = fragmentView.findViewById(R.id.destinationSpinner);
         ArrayAdapter<CharSequence> destinationsAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.destinations, android.R.layout.simple_spinner_item);
         destinationsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         destinationSpinner.setAdapter(destinationsAdapter);
+
+        // Setup SAVE_PROFILE button
+        Button saveProfileButton = fragmentView.findViewById(R.id.saveProfileButton);
+        saveProfileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (selectedFolderPath.equals("")) {
+                    Toast.makeText(getContext(), "Select source folder first!", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
+                    String audioFormat = spinner.getSelectedItem().toString();
+                    String destination = destinationSpinner.getSelectedItem().toString();
+                    mListener.onSaveProfile(selectedFolderPath, fileHandling, audioFormat, destination);
+                }
+            }
+        });
 
         return fragmentView;
     }
