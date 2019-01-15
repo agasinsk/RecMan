@@ -22,7 +22,6 @@ public class App extends Application {
      */
     private final AtomicReference<IGraphServiceClient> mClient = new AtomicReference<>();
 
-
     @Override
     public void onCreate() {
         super.onCreate();
