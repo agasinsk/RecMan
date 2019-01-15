@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Recordings Manager</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_accounts">Accounts</string>
+    <string name="action_profiles">Profiles</string>
+    <string name="action_home">Home</string>
+    <string name="audio_format">Audio format</string>
+    <string name="source_folder">Source folder</string>
+    <string name="select_folder">Select folder</string>
+    <string name="destination">Destination</string>
+    <string name="wifi_unavailable_error_message">Unable to access the internet, please visit connection settings</string>
+    <string name="error_title">Error!</string>
+    <string name="close">Close</string>
+    <string-array name="audio_formats">
+        <item>MP3</item>
+        <item>FLAC</item>
+        <item>AIFF</item>
+    </string-array>
+
+    <string-array name="destinations">
+        <item>OneDrive</item>
+        <item>Google Drive</item>
+    </string-array>
+
+    <string name="title_activity_home">Home Activity</string>
+    <string name="title_home">Home</string>
+    <string name="title_profiles">Profiles</string>
+    <string name="title_account">Account</string>
+</resources>
