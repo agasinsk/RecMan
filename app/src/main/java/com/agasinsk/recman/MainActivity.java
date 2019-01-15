@@ -15,7 +15,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements HomeFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements HomeFragment.OnFragmentInteractionListener, ProfilesFragment.OnFragmentInteractionListener {
 
     private final int SOURCE_FOLDER_REQUEST_CODE = 100;
     private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 200;
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
                     loadFragment(HomeFragment.newInstance());
                     return true;
                 case R.id.navigation_profiles:
-                    mTextMessage.setText(R.string.title_profiles);
+                    loadFragment(ProfilesFragment.newInstance());
                     return true;
                 case R.id.navigation_account:
                     mTextMessage.setText(R.string.title_account);
@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
             return false;
         }
     };
-
 
     private void checkForPermissions() {
         // Check for INTERNET permission
@@ -158,5 +157,10 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
         //TODO: save profile in db
 
         Log.i(RECMAN_TAG, "Profile is saving!" + sourceFolder);
+    }
+
+    @Override
+    public void onProfileSelected(int profileId) {
+        Log.i(RECMAN_TAG, "Profile selected with id: " + profileId);
     }
 }

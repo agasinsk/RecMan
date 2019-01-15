@@ -10,6 +10,8 @@
     <string name="select_folder">Select folder</string>
     <string name="destination">Destination</string>
     <string name="save_profile">Save profile</string>
+    <string name="delete_profile">Delete profile</string>
+    <string name="use_profile">Use profile</string>
     <string name="wifi_unavailable_error_message">Unable to access the internet, please visit connection settings</string>
     <string name="error_title">Error!</string>
     <string name="close">Close</string>
