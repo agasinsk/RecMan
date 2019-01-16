@@ -7,14 +7,21 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 
 public class ProfilesFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private View fragmentView;
+
+    private ListView profilesListView;
+    private ProfileListAdapter mAdapter;
 
     public ProfilesFragment() {
         // Required empty public constructor
@@ -54,6 +61,17 @@ public class ProfilesFragment extends Fragment {
                 mListener.onProfileSelected(1);
             }
         });
+
+        // Setup the list view
+        profilesListView = fragmentView.findViewById(R.id.profilesListView);
+        ArrayList<Profile> profilesFromDb = new ArrayList<>();
+        profilesFromDb.add(new Profile("source1", "take all", "MP3", true));
+        profilesFromDb.add(new Profile("source2", "take newest", "FLAC"));
+        profilesFromDb.add(new Profile("source3", "take first", "AIFF"));
+
+
+        mAdapter = new ProfileListAdapter(getContext(), profilesFromDb);
+        profilesListView.setAdapter(mAdapter);
 
         return fragmentView;
     }

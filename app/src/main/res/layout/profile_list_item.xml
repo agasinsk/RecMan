@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@null">
+
+
+    <CheckBox
+        android:id="@+id/isDefaultCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/profileNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="16dp"
+        android:layout_marginStart="8dp"
+        android:text="Name"
+        android:textAllCaps="true"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/isDefaultCheckBox"
+        app:layout_constraintStart_toEndOf="@+id/isDefaultCheckBox"
+        app:layout_constraintTop_toTopOf="@+id/isDefaultCheckBox" />
+
+    <TextView
+        android:id="@+id/profileSourceTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Source"
+        app:layout_constraintBottom_toBottomOf="@+id/profileNameTextView"
+        app:layout_constraintStart_toEndOf="@+id/profileNameTextView"
+        app:layout_constraintTop_toTopOf="@+id/profileNameTextView" />
+
+    <TextView
+        android:id="@+id/profileFileHandlingTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="File hangling"
+        app:layout_constraintBottom_toBottomOf="@+id/profileSourceTextView"
+        app:layout_constraintStart_toEndOf="@+id/profileSourceTextView"
+        app:layout_constraintTop_toTopOf="@+id/profileSourceTextView"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/profileAudioFormatTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Audio "
+        app:layout_constraintBottom_toBottomOf="@+id/profileFileHandlingTextView"
+        app:layout_constraintStart_toEndOf="@+id/profileFileHandlingTextView"
+        app:layout_constraintTop_toTopOf="@+id/profileFileHandlingTextView" />
+</android.support.constraint.ConstraintLayout>
