@@ -17,11 +17,15 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements HomeFragment.OnFragmentInteractionListener, ProfilesFragment.OnFragmentInteractionListener, ProfileNameDialogFragment.ProfileNameDialogListener {
+public class MainActivity extends AppCompatActivity
+        implements HomeFragment.OnFragmentInteractionListener,
+        ProfilesFragment.OnFragmentInteractionListener,
+        ProfileNameDialogFragment.ProfileNameDialogListener {
 
     private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 200;
     private final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 201;
@@ -159,6 +163,53 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
     }
 
     @Override
+    public Profile getDefaultProfile() {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        String selection = ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT + " > ?";
+        String[] selectionArgs = {"0"};
+        String sortOrder = ProfilesContract.Profile._ID + " ASC LIMIT 1";
+
+        Cursor cursor = db.query(
+                ProfilesContract.Profile.TABLE_NAME,   // The table to query
+                null,             // The array of columns to return (pass null to get all)
+                selection,              // The columns for the WHERE clause
+                selectionArgs,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                sortOrder               // The sort order
+        );
+
+        // take any profile
+        if (cursor.getCount() < 1) {
+            cursor = db.query(
+                    ProfilesContract.Profile.TABLE_NAME,   // The table to query
+                    null,             // The array of columns to return (pass null to get all)
+                    null,              // The columns for the WHERE clause
+                    null,          // The values for the WHERE clause
+                    null,                   // don't group the rows
+                    null,                   // don't filter by row groups
+                    sortOrder               // The sort order
+            );
+        }
+
+        Profile profile = null;
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(ProfilesContract.Profile._ID));
+            String profileName = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_NAME));
+            String sourceFolder = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_SOURCE_FOLDER));
+            String fileHandling = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_FILE_HANDLING));
+            String audioFormat = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_AUDIO_FORMAT));
+            boolean isDefault = cursor.getInt(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT)) > 0;
+
+            profile = new Profile(id, profileName, sourceFolder, fileHandling, audioFormat, isDefault);
+        }
+        cursor.close();
+
+        return profile;
+    }
+
+    @Override
     public void onSaveProfile(String sourceFolder, String fileHandling, String audioFormat) {
         profileToSave = new Profile(sourceFolder, fileHandling, audioFormat);
         showNoticeDialog();
@@ -203,6 +254,53 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
     @Override
     public void setProfileAsDefault(int profileId) {
         Log.i(RECMAN_TAG, "Profile is being set as default");
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT, true);
+
+        String selection = ProfilesContract.Profile._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(profileId)};
+
+        // set row as default
+        int rowsSetAsDefaultCount = db.update(
+                ProfilesContract.Profile.TABLE_NAME,
+                values,
+                selection,
+                selectionArgs);
+
+        // set other rows as not default
+        ContentValues falseValues = new ContentValues();
+        falseValues.put(ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT, false);
+
+        selection = ProfilesContract.Profile._ID + " != ?";
+
+        int rowsUnsetAsDefaultCount = db.update(
+                ProfilesContract.Profile.TABLE_NAME,
+                falseValues,
+                selection,
+                selectionArgs);
+
+        if (rowsSetAsDefaultCount > 0) {
+            Toast.makeText(this, "Profile successfully set as default", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "An error occurred while setting profile as default. Please try again.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void deleteRow(int profileId) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        String selection = ProfilesContract.Profile._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(profileId)};
+
+        int deletedRowsCount = db.delete(ProfilesContract.Profile.TABLE_NAME, selection, selectionArgs);
+        if (deletedRowsCount > 0) {
+            Toast.makeText(this, "Profile successfully deleted", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "An error occurred while deleting the profile. Please try again.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -239,7 +337,11 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
         long newRowId = db.insert(ProfilesContract.Profile.TABLE_NAME, null, values);
 
         Log.i(RECMAN_TAG, "Profile saved with id: " + newRowId);
-
+        if (newRowId > 0) {
+            Toast.makeText(this, "Profile successfully saved", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "An error occurred while saving the profile. Please try again.", Toast.LENGTH_SHORT).show();
+        }
         profileToSave = null;
     }
 

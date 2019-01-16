@@ -16,8 +16,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import cafe.adriel.androidaudioconverter.model.AudioFormat;
-
 
 public class HomeFragment extends Fragment {
 
@@ -27,9 +25,11 @@ public class HomeFragment extends Fragment {
     private final int SOURCE_FOLDER_REQUEST_CODE = 100;
     private String selectedFolderPath = "";
     private Uri selectedFolderUri = null;
+    Profile defaultProfile;
 
     private OnFragmentInteractionListener mListener;
     private View fragmentView;
+    TextView selectedFolderTextView;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -58,6 +58,7 @@ public class HomeFragment extends Fragment {
         fragmentView = inflater.inflate(R.layout.fragment_home, container, false);
 
         // Setup source folder selection
+        selectedFolderTextView = fragmentView.findViewById(R.id.selectedFolder);
         final Button selectFolderButton = fragmentView.findViewById(R.id.folderButton);
         selectFolderButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,13 +68,13 @@ public class HomeFragment extends Fragment {
         });
 
         /* Setup spinner for audio formats */
-        final Spinner spinner = fragmentView.findViewById(R.id.audioFormatSpinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+        final Spinner audioFormatSpinner = fragmentView.findViewById(R.id.audioFormatSpinner);
+        ArrayAdapter<CharSequence> audioFormatAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.audio_formats, android.R.layout.simple_spinner_item);
 
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        audioFormatAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        spinner.setAdapter(adapter);
+        audioFormatSpinner.setAdapter(audioFormatAdapter);
 
         /* Setup spinner for file handling */
         final Spinner fileHandlingSpinner = fragmentView.findViewById(R.id.fileHandlingSpinner);
@@ -98,24 +99,25 @@ public class HomeFragment extends Fragment {
             public void onClick(View v) {
                 if (selectedFolderPath.equals("")) {
                     Toast.makeText(getContext(), "Select source folder first!", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
-                    String audioFormat = spinner.getSelectedItem().toString();
-                    String destination = destinationSpinner.getSelectedItem().toString();
+                    String audioFormat = audioFormatSpinner.getSelectedItem().toString();
                     mListener.onSaveProfile(selectedFolderPath, fileHandling, audioFormat);
                 }
             }
         });
 
-        return fragmentView;
-    }
+        defaultProfile = mListener.getDefaultProfile();
+        if (defaultProfile != null) {
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            //mListener.onSaveProfile(uri);
+            fileHandlingSpinner.setSelection(fileHandlingsAdapter.getPosition(defaultProfile.fileHandling), true);
+            fileHandlingSpinner.setSelection(fileHandlingsAdapter.getPosition(defaultProfile.fileHandling), true);
+            audioFormatSpinner.setSelection(audioFormatAdapter.getPosition(defaultProfile.audioFormat), true);
+            selectedFolderTextView.setText(defaultProfile.sourceFolder);
+            selectedFolderPath = defaultProfile.sourceFolder;
         }
+
+        return fragmentView;
     }
 
     public void performFileSearch() {
@@ -133,8 +135,7 @@ public class HomeFragment extends Fragment {
                 Log.i(RECMAN_TAG, "Uri: " + selectedFolderUri.toString());
                 selectedFolderPath = FileUtils.getFullPathFromTreeUri(selectedFolderUri, getActivity());
 
-                TextView selectedFolder = fragmentView.findViewById(R.id.selectedFolder);
-                selectedFolder.setText(selectedFolderPath);
+                selectedFolderTextView.setText(selectedFolderPath);
             }
         }
     }
@@ -156,17 +157,9 @@ public class HomeFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
+
+        Profile getDefaultProfile();
 
         void onSaveProfile(String sourceFolder, String fileHandling, String audioFormat);
     }

@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -53,19 +54,21 @@ public class ProfilesFragment extends Fragment {
         deleteProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(selectedProfile != null) {
+                if (selectedProfile != null) {
                     Log.i(LOG_TAG, "About to delete profile with id " + selectedProfile.id);
+                    mListener.deleteRow(selectedProfile.id);
                 }
             }
         });
 
-        // Setup USE_PROFILE button
+        // Setup SET_DEFAULT button
         Button setDefaultButton = fragmentView.findViewById(R.id.setDefaultButton);
         setDefaultButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (selectedProfile != null) {
                     Log.i(LOG_TAG, "About to set profile with id " + selectedProfile.id + " as default");
+                    mListener.setProfileAsDefault(selectedProfile.id);
                 }
             }
         });
@@ -78,6 +81,8 @@ public class ProfilesFragment extends Fragment {
                 if (selectedProfile != null) {
                     Log.i(LOG_TAG, "About to use profile with id " + selectedProfile.id);
                     mListener.onProfileSelected(selectedProfile.id);
+                } else {
+                    Toast.makeText(getContext(), "You have to select profile to use it!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -86,14 +91,14 @@ public class ProfilesFragment extends Fragment {
         profilesListView = fragmentView.findViewById(R.id.profilesListView);
         ArrayList<Profile> profilesFromDb = mListener.getProfiles();
 
-        mAdapter = new ProfileListAdapter(getContext(),R.layout.profile_list_item, profilesFromDb);
+        mAdapter = new ProfileListAdapter(getContext(), R.layout.profile_list_item, profilesFromDb);
         profilesListView.setAdapter(mAdapter);
 
         profilesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long arg3) {
                 Log.i(LOG_TAG, "Profile with id " + position + " selected");
-                selectedProfile = (Profile)parent.getItemAtPosition(position);
+                selectedProfile = (Profile) parent.getItemAtPosition(position);
             }
         });
 
@@ -120,7 +125,11 @@ public class ProfilesFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         ArrayList<Profile> getProfiles();
+
         void setProfileAsDefault(int profileId);
+
+        void deleteRow(int profileId);
+
         void onProfileSelected(int profileId);
     }
 }
