@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@null">
-
+    android:descendantFocusability="blocksDescendants"
+    >
 
     <CheckBox
         android:id="@+id/isDefaultCheckBox"
@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="16dp"
         android:layout_marginStart="8dp"
-        android:text="Name"
+        android:text="@string/name"
         android:textAllCaps="true"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/isDefaultCheckBox"
@@ -34,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="Source"
+        android:text="@string/source_folder"
         app:layout_constraintBottom_toBottomOf="@+id/profileNameTextView"
         app:layout_constraintStart_toEndOf="@+id/profileNameTextView"
         app:layout_constraintTop_toTopOf="@+id/profileNameTextView" />
@@ -44,7 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="File hangling"
+        android:text="@string/file_handling"
         app:layout_constraintBottom_toBottomOf="@+id/profileSourceTextView"
         app:layout_constraintStart_toEndOf="@+id/profileSourceTextView"
         app:layout_constraintTop_toTopOf="@+id/profileSourceTextView"
@@ -55,7 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="Audio "
+        android:text="@string/audio_format"
         app:layout_constraintBottom_toBottomOf="@+id/profileFileHandlingTextView"
         app:layout_constraintStart_toEndOf="@+id/profileFileHandlingTextView"
         app:layout_constraintTop_toTopOf="@+id/profileFileHandlingTextView" />

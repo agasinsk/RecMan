@@ -21,10 +21,20 @@ public class ProfileListAdapter extends ArrayAdapter<Profile> {
     private Context mContext;
     private ArrayList<Profile> profiles;
 
-    public ProfileListAdapter(@NonNull Context context, @LayoutRes ArrayList<Profile> list) {
-        super(context, 0, list);
+    public ProfileListAdapter(@NonNull Context context,  @LayoutRes int resource, ArrayList<Profile> list) {
+        super(context, resource, list);
         mContext = context;
         profiles = list;
+    }
+
+    @Override
+    public Profile getItem(int position) {
+        return profiles.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     @NonNull
@@ -32,16 +42,23 @@ public class ProfileListAdapter extends ArrayAdapter<Profile> {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         View listItem = convertView;
 
-        Profile currentProfile = profiles.get(position);
+        final Profile currentProfile = profiles.get(position);
 
         //Inflate the view
         if (listItem == null) {
-            Log.i(LOG_TAG, "Creating profile list item from scratch");
+            Log.i(LOG_TAG, "Creating profile list item from scratch with id " + position);
             listItem = LayoutInflater.from(mContext).inflate(R.layout.profile_list_item, parent, false);
         }
 
         CheckBox isDefaultCheckBox = listItem.findViewById(R.id.isDefaultCheckBox);
         isDefaultCheckBox.setChecked(currentProfile.isDefault);
+        isDefaultCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(LOG_TAG, "Profile with id " + currentProfile.id + " is about to be set as default");
+            }
+        });
+
 
         TextView name = listItem.findViewById(R.id.profileNameTextView);
         name.setText(currentProfile.name);

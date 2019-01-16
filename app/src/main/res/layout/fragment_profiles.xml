@@ -7,25 +7,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ProfilesFragment"
-    android:layout_marginBottom="@dimen/activity_vertical_margin2">
+    android:layout_marginBottom="@dimen/activity_vertical_margin">
+
+    <Button
+        android:id="@+id/setDefaultButton"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/set_default"
+        app:layout_constraintBottom_toTopOf="@+id/useProfileButton"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
         android:id="@+id/useProfileButton"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="32dp"
         android:text="@string/use_profile"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/title_profiles"
         android:textSize="18sp"
@@ -38,12 +51,12 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:choiceMode="singleChoice"
-        android:listSelector="#666666"
-        app:layout_constraintBottom_toTopOf="@+id/deleteButton"
+        android:listSelector="#dddddd"
+        app:layout_constraintBottom_toTopOf="@+id/setDefaultButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
@@ -54,9 +67,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/delete_profile"
-        app:layout_constraintBottom_toBottomOf="@+id/useProfileButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/useProfileButton" />
+        app:layout_constraintBottom_toTopOf="@+id/useProfileButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </android.support.constraint.ConstraintLayout>
 
