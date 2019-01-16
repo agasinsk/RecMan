@@ -2,6 +2,7 @@ package com.agasinsk.recman;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -82,13 +84,7 @@ public class ProfilesFragment extends Fragment {
 
         // Setup the list view
         profilesListView = fragmentView.findViewById(R.id.profilesListView);
-        ArrayList<Profile> profilesFromDb = new ArrayList<>();
-
-        //TODO: get profiles from db
-        profilesFromDb.add(new Profile(1,"source1", "take all", "MP3", true));
-        profilesFromDb.add(new Profile(2,"source2", "take newest", "FLAC"));
-        profilesFromDb.add(new Profile(3,"source3", "take first", "AIFF"));
-        profilesFromDb.add(new Profile(4,"sourceLongerThanOtherSources", "take me out", "AIFF"));
+        ArrayList<Profile> profilesFromDb = mListener.getProfiles();
 
         mAdapter = new ProfileListAdapter(getContext(),R.layout.profile_list_item, profilesFromDb);
         profilesListView.setAdapter(mAdapter);
@@ -122,17 +118,9 @@ public class ProfilesFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
+        ArrayList<Profile> getProfiles();
+        void setProfileAsDefault(int profileId);
         void onProfileSelected(int profileId);
     }
 }

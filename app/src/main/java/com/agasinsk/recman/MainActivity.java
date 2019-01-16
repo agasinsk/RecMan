@@ -1,36 +1,44 @@
 package com.agasinsk.recman;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements HomeFragment.OnFragmentInteractionListener, ProfilesFragment.OnFragmentInteractionListener {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final int SOURCE_FOLDER_REQUEST_CODE = 100;
+public class MainActivity extends AppCompatActivity implements HomeFragment.OnFragmentInteractionListener, ProfilesFragment.OnFragmentInteractionListener, ProfileNameDialogFragment.ProfileNameDialogListener {
+
     private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 200;
     private final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 201;
     private final int PERMISSIONS_REQUEST_INTERNET = 202;
     private final int PERMISSIONS_REQUEST_ACCESS_NETWORK_STATE = 203;
-    private final String RECMAN_TAG = "RecMan";
-    private TextView mTextMessage;
+    private final String RECMAN_TAG = "REC:Main";
+
+    private Profile profileToSave;
+    protected ProfilesDbHelper mDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTextMessage = findViewById(R.id.message);
+        mDbHelper = new ProfilesDbHelper(getApplicationContext());
+
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
@@ -40,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkForPermissions();
         }
-
     }
 
     private void loadFragment(Fragment fragment) {
@@ -64,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
                     loadFragment(ProfilesFragment.newInstance());
                     return true;
                 case R.id.navigation_account:
-                    mTextMessage.setText(R.string.title_account);
                     return true;
             }
             return false;
@@ -153,14 +159,88 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
     }
 
     @Override
-    public void onSaveProfile(String sourceFolder, String fileHandling, String audioFormat, String audioDetails) {
-        //TODO: save profile in db
+    public void onSaveProfile(String sourceFolder, String fileHandling, String audioFormat) {
+        profileToSave = new Profile(sourceFolder, fileHandling, audioFormat);
+        showNoticeDialog();
+    }
 
-        Log.i(RECMAN_TAG, "Profile is saving!" + sourceFolder);
+    public void showNoticeDialog() {
+        DialogFragment dialog = new ProfileNameDialogFragment();
+        dialog.show(getSupportFragmentManager(), "profileNameDialog");
+    }
+
+    @Override
+    public ArrayList<Profile> getProfiles() {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        Cursor cursor = db.query(
+                ProfilesContract.Profile.TABLE_NAME,   // The table to query
+                null,             // The array of columns to return (pass null to get all)
+                null,              // The columns for the WHERE clause
+                null,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                null               // The sort order
+        );
+
+        ArrayList<Profile> dbProfiles = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(ProfilesContract.Profile._ID));
+            String profileName = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_NAME));
+            String sourceFolder = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_SOURCE_FOLDER));
+            String fileHandling = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_FILE_HANDLING));
+            String audioFormat = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_AUDIO_FORMAT));
+            boolean isDefault = cursor.getInt(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT)) > 0;
+
+            Profile profile = new Profile(id, profileName, sourceFolder, fileHandling, audioFormat, isDefault);
+            dbProfiles.add(profile);
+        }
+        cursor.close();
+
+        return dbProfiles;
+    }
+
+    @Override
+    public void setProfileAsDefault(int profileId) {
+        Log.i(RECMAN_TAG, "Profile is being set as default");
     }
 
     @Override
     public void onProfileSelected(int profileId) {
         Log.i(RECMAN_TAG, "Profile selected with id: " + profileId);
     }
+
+    @Override
+    protected void onDestroy() {
+        mDbHelper.close();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onProfileNameDialogClosed(String profileName) {
+        saveProfileInDb(profileName);
+    }
+
+    public void saveProfileInDb(String profileName) {
+        Log.i(RECMAN_TAG, "Profile is saving!");
+
+        // Gets the data repository in write mode
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(ProfilesContract.Profile.COLUMN_NAME_NAME, profileName);
+        values.put(ProfilesContract.Profile.COLUMN_NAME_SOURCE_FOLDER, profileToSave.sourceFolder);
+        values.put(ProfilesContract.Profile.COLUMN_NAME_FILE_HANDLING, profileToSave.fileHandling);
+        values.put(ProfilesContract.Profile.COLUMN_NAME_AUDIO_FORMAT, profileToSave.audioFormat);
+        values.put(ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT, false);
+
+        // Insert the new row, returning the primary key value of the new row
+        long newRowId = db.insert(ProfilesContract.Profile.TABLE_NAME, null, values);
+
+        Log.i(RECMAN_TAG, "Profile saved with id: " + newRowId);
+
+        profileToSave = null;
+    }
+
 }

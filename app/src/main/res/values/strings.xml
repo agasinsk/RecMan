@@ -39,5 +39,9 @@
     <string name="title_home">Home</string>
     <string name="title_profiles">Profiles</string>
     <string name="title_account">Account</string>
+    <string name="dialog_set_profile_name">Give a name to a new profile:</string>
+    <string name="ok">OK</string>
+    <string name="skip">Skip</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

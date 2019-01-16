@@ -34,6 +34,13 @@ public class Profile {
         this.audioFormat = audioFormat;
     }
 
+    public Profile(String sourceFolder, String fileHandling, String audioFormat) {
+        this.id = id;
+        this.sourceFolder = sourceFolder;
+        this.fileHandling = fileHandling;
+        this.audioFormat = audioFormat;
+    }
+
     @Override
     public String toString() {
         return this.name + " " + this.sourceFolder + " " + this.fileHandling + " " + this.audioFormat;

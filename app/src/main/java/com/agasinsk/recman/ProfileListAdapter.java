@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,7 @@ import java.util.ArrayList;
 
 public class ProfileListAdapter extends ArrayAdapter<Profile> {
 
-    private static final String LOG_TAG = "RecMan:ProfileList";
+    private static final String LOG_TAG = "ProfileList";
 
     private Context mContext;
     private ArrayList<Profile> profiles;
@@ -46,19 +45,12 @@ public class ProfileListAdapter extends ArrayAdapter<Profile> {
 
         //Inflate the view
         if (listItem == null) {
-            Log.i(LOG_TAG, "Creating profile list item from scratch with id " + position);
             listItem = LayoutInflater.from(mContext).inflate(R.layout.profile_list_item, parent, false);
         }
 
         CheckBox isDefaultCheckBox = listItem.findViewById(R.id.isDefaultCheckBox);
         isDefaultCheckBox.setChecked(currentProfile.isDefault);
-        isDefaultCheckBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(LOG_TAG, "Profile with id " + currentProfile.id + " is about to be set as default");
-            }
-        });
-
+        isDefaultCheckBox.setEnabled(false);
 
         TextView name = listItem.findViewById(R.id.profileNameTextView);
         name.setText(currentProfile.name);

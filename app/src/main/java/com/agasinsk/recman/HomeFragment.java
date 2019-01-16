@@ -103,7 +103,7 @@ public class HomeFragment extends Fragment {
                     String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
                     String audioFormat = spinner.getSelectedItem().toString();
                     String destination = destinationSpinner.getSelectedItem().toString();
-                    mListener.onSaveProfile(selectedFolderPath, fileHandling, audioFormat, destination);
+                    mListener.onSaveProfile(selectedFolderPath, fileHandling, audioFormat);
                 }
             }
         });
@@ -168,6 +168,6 @@ public class HomeFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
 
-        void onSaveProfile(String sourceFolder, String fileHandling, String audioFormat, String audioDetails);
+        void onSaveProfile(String sourceFolder, String fileHandling, String audioFormat);
     }
 }
