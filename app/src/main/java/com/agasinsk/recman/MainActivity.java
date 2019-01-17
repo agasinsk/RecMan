@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity
         mBottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         loadFragment(HomeFragment.newInstance(null));
+        mBottomNavigation.setSelectedItemId(R.id.navigation_home);
 
         // Permissions check
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

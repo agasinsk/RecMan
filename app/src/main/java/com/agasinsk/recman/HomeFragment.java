@@ -24,6 +24,8 @@ import com.agasinsk.recman.helpers.ProfilesRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
 import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
@@ -36,6 +38,7 @@ public class HomeFragment extends Fragment {
     private String selectedFolderPath = "";
     private Uri selectedFolderUri = null;
     TextView selectedFolderTextView;
+    private AudioFormat mAudioFormat;
 
     public void setDefaultProfile(Profile defaultProfile) {
         this.defaultProfile = defaultProfile;
@@ -140,7 +143,7 @@ public class HomeFragment extends Fragment {
             convertAudioFiles(selectedFolderPath, fileHandling, audioFormat);
         });
 
-        new GetDefaultProfileTask().execute(defaultProfile == null);
+        new GetDefaultProfileTask().execute(defaultProfile != null);
 
         return fragmentView;
     }
@@ -180,25 +183,24 @@ public class HomeFragment extends Fragment {
             Log.e(RECMAN_TAG, "An error occurred while selecting files!", e);
         }
 
-        IConvertCallback callback = new IConvertCallback() {
-            @Override
-            public void onSuccess(File convertedFile) {
-                Log.i(RECMAN_TAG, "File " + convertedFile.getName() + " successfully converted!");
-                // saveFileToOneDrive(convertedFile);
-            }
-
-            @Override
-            public void onFailure(Exception error) {
-                Log.e(RECMAN_TAG, "An error occurred during file conversion!", error);
-            }
-        };
-
+        mAudioFormat = AudioFormat.valueOf(audioFormat);
         // TODO: do this in a task
         for (File file : filesToConvert) {
             AndroidAudioConverter.with(getContext())
                     .setFile(file)
                     .setFormat(AudioFormat.valueOf(audioFormat))
-                    .setCallback(callback)
+                    .setCallback(new IConvertCallback() {
+                        @Override
+                        public void onSuccess(File convertedFile) {
+                            Log.i(RECMAN_TAG, "File " + convertedFile.getName() + " successfully converted!");
+                            // saveFileToOneDrive(convertedFile);
+                        }
+
+                        @Override
+                        public void onFailure(Exception error) {
+                            Log.e(RECMAN_TAG, "An error occurred during file conversion!", error);
+                        }
+                    })
                     .convert();
         }
     }
@@ -242,8 +244,6 @@ public class HomeFragment extends Fragment {
 
                 selectedFolderTextView.setText(defaultProfile.getSourceFolder());
                 selectedFolderPath = defaultProfile.getSourceFolder();
-            } else {
-                Toast.makeText(getContext(), R.string.toast_database_error, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -268,6 +268,48 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), R.string.toast_profile_created, Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getContext(), R.string.toast_database_error, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private class ConvertAudioFilesTask extends AsyncTask<File, Void, List<File>> {
+        protected List<File> doInBackground(File... filesToConvert) {
+            List<File> convertedFiles = new ArrayList<>();
+            IConvertCallback callback = new IConvertCallback() {
+                @Override
+                public void onSuccess(File convertedFile) {
+                    Log.i(RECMAN_TAG, "File " + convertedFile.getName() + " successfully converted!");
+                    convertedFiles.add(convertedFile);
+                }
+
+                @Override
+                public void onFailure(Exception error) {
+                    Log.e(RECMAN_TAG, "An error occurred during file conversion!", error);
+                }
+            };
+
+            for (File file : filesToConvert) {
+                AndroidAudioConverter.with(getContext())
+                        .setFile(file)
+                        .setFormat(AudioFormat.MP3)
+                        .setCallback(callback)
+                        .convert();
+            }
+            return convertedFiles;
+        }
+
+        protected void onProgressUpdate(Void... params) {
+            fragmentView.findViewById(R.id.homeProgressBar).setVisibility(View.VISIBLE);
+        }
+
+        protected void onPostExecute(List<File> result) {
+            fragmentView.findViewById(R.id.homeProgressBar).setVisibility(View.GONE);
+
+            // TODO: upload files to OneDrive
+            if (result.size() > 0) {
+                Toast.makeText(getContext(), R.string.toast_files_converted, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), R.string.toast_conversion_error, Toast.LENGTH_SHORT).show();
             }
         }
     }

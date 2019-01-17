@@ -119,15 +119,19 @@ public class ProfilesFragment extends Fragment {
         }
 
         protected void onProgressUpdate(Void... params) {
-            ProgressBar progressBar = fragmentView.findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.VISIBLE);
+            fragmentView.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
         }
 
         protected void onPostExecute(List<Profile> result) {
-            ProgressBar progressBar = fragmentView.findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.INVISIBLE);
+            fragmentView.findViewById(R.id.progressBar).setVisibility(View.GONE);
 
             if (result != null) {
+                if (result.size() == 0) {
+                    fragmentView.findViewById(R.id.emptyListTextView).setVisibility(View.VISIBLE);
+                } else {
+                    fragmentView.findViewById(R.id.emptyListTextView).setVisibility(View.GONE);
+                }
+
                 mAdapter.clear();
                 mAdapter.addAll(result);
                 mAdapter.notifyDataSetChanged();
@@ -148,19 +152,18 @@ public class ProfilesFragment extends Fragment {
         }
 
         protected void onProgressUpdate(Void... params) {
-            ProgressBar progressBar = fragmentView.findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.VISIBLE);
+            fragmentView.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
         }
 
         protected void onPostExecute(List<Profile> result) {
-            ProgressBar progressBar = fragmentView.findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.INVISIBLE);
+            fragmentView.findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
 
             if (result != null) {
-                Toast.makeText(getContext(), R.string.toast_profile_deleted, Toast.LENGTH_SHORT).show();
                 mAdapter.clear();
                 mAdapter.addAll(result);
                 mAdapter.notifyDataSetChanged();
+
+                Toast.makeText(getContext(), R.string.toast_profile_deleted, Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getContext(), R.string.toast_database_error, Toast.LENGTH_SHORT).show();
             }
@@ -178,16 +181,15 @@ public class ProfilesFragment extends Fragment {
         }
 
         protected void onProgressUpdate(Void... params) {
-            ProgressBar progressBar = fragmentView.findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.VISIBLE);
+            fragmentView.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
         }
 
         protected void onPostExecute(List<Profile> result) {
-            ProgressBar progressBar = fragmentView.findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.INVISIBLE);
 
             if (result != null) {
+                fragmentView.findViewById(R.id.progressBar).setVisibility(View.GONE);
                 Toast.makeText(getContext(), R.string.toast_profile_set_default, Toast.LENGTH_SHORT).show();
+
                 mAdapter.clear();
                 mAdapter.addAll(result);
                 mAdapter.notifyDataSetChanged();

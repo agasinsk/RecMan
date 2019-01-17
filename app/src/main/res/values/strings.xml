@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Recordings Manager</string>
+    <string name="app_name">RecMan</string>
     <string name="action_settings">Settings</string>
     <string name="action_accounts">Accounts</string>
     <string name="action_profiles">Profiles</string>
@@ -51,4 +51,7 @@
     <string name="toast_profile_set_default">Profile successfully set as default!</string>
     <string name="toast_profile_deleted">Profile successfully deleted!</string>
     <string name="toast_database_error">An error occurred during database operation. Please try again.</string>
+    <string name="toast_files_converted">Audio files have been successfully converted!</string>
+    <string name="toast_conversion_error">An error occurred during audio conversion. Please try again.</string>
+    <string name="no_profiles_yet">You don\'t have any profiles yet!</string>
 </resources>
