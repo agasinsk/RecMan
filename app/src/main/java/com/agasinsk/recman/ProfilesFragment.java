@@ -55,7 +55,6 @@ public class ProfilesFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
     }
@@ -90,7 +89,7 @@ public class ProfilesFragment extends Fragment {
         useProfileButton.setOnClickListener(v -> {
             if (selectedProfile != null) {
                 Log.d(LOG_TAG, "About to use profile with id " + selectedProfile.getId());
-                mListener.onProfileSelected(selectedProfile.getId());
+                mListener.onProfileSelected(selectedProfile);
             } else {
                 Toast.makeText(getContext(), "You have to select profile to use it!", Toast.LENGTH_SHORT).show();
             }
@@ -111,7 +110,7 @@ public class ProfilesFragment extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        void onProfileSelected(int profileId);
+        void onProfileSelected(Profile profile);
     }
 
     private class GetProfilesTask extends AsyncTask<Void, Void, List<Profile>> {

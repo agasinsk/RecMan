@@ -1,41 +1,34 @@
 package com.agasinsk.recman;
 
 import android.Manifest;
-import android.content.ContentValues;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MenuItem;
-import android.widget.Toast;
 
-import com.agasinsk.recman.helpers.ProfilesContract;
-import com.agasinsk.recman.helpers.ProfilesDbHelper;
 import com.agasinsk.recman.helpers.ProfilesRepository;
-
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener,
         ProfilesFragment.OnFragmentInteractionListener,
         ProfileNameDialogFragment.ProfileNameDialogListener {
+
     private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 200;
     private final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 201;
     private final int PERMISSIONS_REQUEST_INTERNET = 202;
     private final int PERMISSIONS_REQUEST_ACCESS_NETWORK_STATE = 203;
     private final String RECMAN_TAG = "REC:Main";
-    private Profile profileToSave;
+
     private ProfilesRepository mProfilesRepository;
+    private ProfilesFragment mProfilesFragment;
+    private HomeFragment mHomeFragment;
+    private BottomNavigationView mBottomNavigation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +37,10 @@ public class MainActivity extends AppCompatActivity
 
         mProfilesRepository = new ProfilesRepository(getApplicationContext());
 
-        BottomNavigationView navigation = findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        mBottomNavigation = findViewById(R.id.navigation);
+        mBottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        loadFragment(HomeFragment.newInstance());
+        loadFragment(HomeFragment.newInstance(null));
 
         // Permissions check
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -56,21 +49,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadFragment(Fragment fragment) {
-        // load fragment
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frame_container, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = item -> {
         switch (item.getItemId()) {
             case R.id.navigation_home:
-                loadFragment(HomeFragment.newInstance());
+                mHomeFragment = HomeFragment.newInstance(null);
+                loadFragment(mHomeFragment);
                 return true;
             case R.id.navigation_profiles:
-                loadFragment(ProfilesFragment.newInstance());
+                mProfilesFragment = ProfilesFragment.newInstance();
+                loadFragment(mProfilesFragment);
                 return true;
             case R.id.navigation_account:
                 return true;
@@ -160,24 +154,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public Profile getDefaultProfile() {
-        return mProfilesRepository.getDefaultProfile();
-    }
-
-    @Override
-    public void onSaveProfile(String sourceFolder, String fileHandling, String audioFormat) {
-        profileToSave = new Profile(sourceFolder, fileHandling, audioFormat);
-        showNoticeDialog();
-    }
-
-    public void showNoticeDialog() {
+    public void askForProfileName() {
         DialogFragment dialog = new ProfileNameDialogFragment();
         dialog.show(getSupportFragmentManager(), "profileNameDialog");
     }
 
     @Override
-    public void onProfileSelected(int profileId) {
-        Log.d(RECMAN_TAG, "Profile selected with id: " + profileId);
+    public void onProfileSelected(Profile profile) {
+        Log.d(RECMAN_TAG, "Profile selected with id: " + profile.getId());
+        mBottomNavigation.setSelectedItemId(R.id.navigation_home);
+        mHomeFragment = HomeFragment.newInstance(profile);
+        loadFragment(mHomeFragment);
     }
 
     @Override
@@ -188,24 +175,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onProfileNameDialogClosed(String profileName) {
-        if (profileToSave != null) {
-            profileToSave.setName(profileName);
-            saveProfile(profileToSave);
-            profileToSave = null;
-        }
-    }
-
-    public void saveProfile(Profile profileToSave) {
-        Log.i(RECMAN_TAG, "Profile is saving!");
-
-        // Insert the new row, returning the primary key value of the new row
-        long newRowId = mProfilesRepository.saveProfile(profileToSave);
-
-        Log.i(RECMAN_TAG, "Profile saved with id: " + newRowId);
-        if (newRowId > 0) {
-            Toast.makeText(this, "Profile successfully saved", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "An error occurred while saving the profile. Please try again.", Toast.LENGTH_SHORT).show();
-        }
+        mHomeFragment.saveProfileWithName(profileName);
     }
 }

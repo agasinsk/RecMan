@@ -20,10 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.agasinsk.recman.helpers.FilesHandler;
+import com.agasinsk.recman.helpers.ProfilesRepository;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
 import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
@@ -32,19 +32,32 @@ import cafe.adriel.androidaudioconverter.model.AudioFormat;
 public class HomeFragment extends Fragment {
     private final String RECMAN_TAG = "RecMan:Home";
     private final int SOURCE_FOLDER_REQUEST_CODE = 100;
+
     private String selectedFolderPath = "";
     private Uri selectedFolderUri = null;
-    Profile defaultProfile;
+    TextView selectedFolderTextView;
+
+    public void setDefaultProfile(Profile defaultProfile) {
+        this.defaultProfile = defaultProfile;
+    }
+
+    private Profile defaultProfile;
+    private Profile mProfileToSave;
+
+    private ProfilesRepository mProfilesRepository;
     private FilesHandler mFilesHandler;
     private OnFragmentInteractionListener mListener;
     private View fragmentView;
-    TextView selectedFolderTextView;
+    private ArrayAdapter<CharSequence> mFileHandlingAdapter;
+    private ArrayAdapter<CharSequence> mAudioFormatAdapter;
 
     public HomeFragment() {
     }
 
-    public static HomeFragment newInstance() {
-        return new HomeFragment();
+    public static HomeFragment newInstance(Profile defaultProfile) {
+        HomeFragment fragment = new HomeFragment();
+        fragment.setDefaultProfile(defaultProfile);
+        return fragment;
     }
 
     @Override
@@ -67,6 +80,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
         mFilesHandler = new FilesHandler();
     }
 
@@ -83,26 +97,26 @@ public class HomeFragment extends Fragment {
 
         /* Setup spinner for audio formats */
         final Spinner audioFormatSpinner = fragmentView.findViewById(R.id.audioFormatSpinner);
-        ArrayAdapter<CharSequence> audioFormatAdapter = ArrayAdapter.createFromResource(getActivity(),
+        mAudioFormatAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.audio_formats, android.R.layout.simple_spinner_item);
 
-        audioFormatAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        audioFormatSpinner.setAdapter(audioFormatAdapter);
+        mAudioFormatAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        audioFormatSpinner.setAdapter(mAudioFormatAdapter);
 
         /* Setup spinner for file handling */
         final Spinner fileHandlingSpinner = fragmentView.findViewById(R.id.fileHandlingSpinner);
-        ArrayAdapter<CharSequence> fileHandlingAdapter = ArrayAdapter.createFromResource(getActivity(),
+        mFileHandlingAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.file_handlings, android.R.layout.simple_spinner_item);
-        fileHandlingAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        fileHandlingSpinner.setAdapter(fileHandlingAdapter);
+        mFileHandlingAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        fileHandlingSpinner.setAdapter(mFileHandlingAdapter);
 
         // Setup spinner for destination
         final Spinner destinationSpinner = fragmentView.findViewById(R.id.destinationSpinner);
-        ArrayAdapter<CharSequence> destinationsAdapter = ArrayAdapter.createFromResource(getActivity(),
+        ArrayAdapter<CharSequence> DestinationsAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.destinations, android.R.layout.simple_spinner_item);
-        destinationsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        DestinationsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        destinationSpinner.setAdapter(destinationsAdapter);
+        destinationSpinner.setAdapter(DestinationsAdapter);
 
         // Setup SAVE_PROFILE button
         Button saveProfileButton = fragmentView.findViewById(R.id.saveProfileButton);
@@ -112,7 +126,9 @@ public class HomeFragment extends Fragment {
             } else {
                 String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
                 String audioFormat = audioFormatSpinner.getSelectedItem().toString();
-                mListener.onSaveProfile(selectedFolderPath, fileHandling, audioFormat);
+
+                mProfileToSave = new Profile(selectedFolderPath, fileHandling, audioFormat);
+                mListener.askForProfileName();
             }
         });
 
@@ -124,14 +140,7 @@ public class HomeFragment extends Fragment {
             convertAudioFiles(selectedFolderPath, fileHandling, audioFormat);
         });
 
-        defaultProfile = mListener.getDefaultProfile();
-        if (defaultProfile != null) {
-            fileHandlingSpinner.setSelection(fileHandlingAdapter.getPosition(defaultProfile.fileHandling), true);
-            fileHandlingSpinner.setSelection(fileHandlingAdapter.getPosition(defaultProfile.fileHandling), true);
-            audioFormatSpinner.setSelection(audioFormatAdapter.getPosition(defaultProfile.audioFormat), true);
-            selectedFolderTextView.setText(defaultProfile.sourceFolder);
-            selectedFolderPath = defaultProfile.sourceFolder;
-        }
+        new GetDefaultProfileTask().execute(defaultProfile == null);
 
         return fragmentView;
     }
@@ -194,11 +203,72 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public interface OnFragmentInteractionListener {
-        Profile getDefaultProfile();
-
-        void onSaveProfile(String sourceFolder, String fileHandling, String audioFormat);
+    public void saveProfileWithName(String profileName) {
+        if (mProfileToSave != null) {
+            mProfileToSave.setName(profileName);
+            new SaveProfileTask().execute(mProfileToSave);
+        }
     }
 
-   
+    public interface OnFragmentInteractionListener {
+        void askForProfileName();
+    }
+
+    private class GetDefaultProfileTask extends AsyncTask<Boolean, Void, Profile> {
+        protected Profile doInBackground(Boolean... params) {
+            Boolean profileWasPassed = params[0];
+            if (profileWasPassed) {
+                return defaultProfile;
+            }
+            return mProfilesRepository.getDefaultProfile();
+        }
+
+        protected void onProgressUpdate(Void... params) {
+            ProgressBar progressBar = fragmentView.findViewById(R.id.homeProgressBar);
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        protected void onPostExecute(Profile result) {
+            ProgressBar progressBar = fragmentView.findViewById(R.id.homeProgressBar);
+            progressBar.setVisibility(View.INVISIBLE);
+
+            if (result != null) {
+                defaultProfile = result;
+                Spinner fileHandlingSpinner = fragmentView.findViewById(R.id.fileHandlingSpinner);
+                fileHandlingSpinner.setSelection(mFileHandlingAdapter.getPosition(defaultProfile.getFileHandling()), true);
+
+                Spinner audioFormatSpinner = fragmentView.findViewById(R.id.audioFormatSpinner);
+                audioFormatSpinner.setSelection(mAudioFormatAdapter.getPosition(defaultProfile.getAudioFormat()), true);
+
+                selectedFolderTextView.setText(defaultProfile.getSourceFolder());
+                selectedFolderPath = defaultProfile.getSourceFolder();
+            } else {
+                Toast.makeText(getContext(), R.string.toast_database_error, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private class SaveProfileTask extends AsyncTask<Profile, Void, Long> {
+        protected Long doInBackground(Profile... profiles) {
+            Profile profileToSave = profiles[0];
+            return mProfilesRepository.saveProfile(profileToSave);
+        }
+
+        protected void onProgressUpdate(Void... params) {
+            ProgressBar progressBar = fragmentView.findViewById(R.id.homeProgressBar);
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        protected void onPostExecute(Long result) {
+            ProgressBar progressBar = fragmentView.findViewById(R.id.homeProgressBar);
+            progressBar.setVisibility(View.INVISIBLE);
+
+            Log.i(RECMAN_TAG, "Profile saved with id: " + result);
+            if (result > 0) {
+                Toast.makeText(getContext(), R.string.toast_profile_created, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), R.string.toast_database_error, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }
