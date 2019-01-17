@@ -1,4 +1,4 @@
-package com.agasinsk.recman;
+package com.agasinsk.recman.helpers;
 
 import android.provider.BaseColumns;
 

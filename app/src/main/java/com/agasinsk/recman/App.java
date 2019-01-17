@@ -29,11 +29,12 @@ public class App extends Application {
         AndroidAudioConverter.load(this, new ILoadCallback() {
             @Override
             public void onSuccess() {
+                Log.i("RecMan:App", "Android Audio Converter loaded.");
             }
 
             @Override
             public void onFailure(Exception error) {
-                Log.e("RecMan", "Android Audio Converter failed to load!");
+                Log.e("RecMan:App", "Android Audio Converter failed to load!");
             }
         });
     }

@@ -14,13 +14,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class ProfileListAdapter extends ArrayAdapter<Profile> {
-
     private static final String LOG_TAG = "ProfileList";
-
     private Context mContext;
     private ArrayList<Profile> profiles;
 
-    public ProfileListAdapter(@NonNull Context context,  @LayoutRes int resource, ArrayList<Profile> list) {
+    public ProfileListAdapter(@NonNull Context context, @LayoutRes int resource, ArrayList<Profile> list) {
         super(context, resource, list);
         mContext = context;
         profiles = list;
@@ -66,6 +64,4 @@ public class ProfileListAdapter extends ArrayAdapter<Profile> {
 
         return listItem;
     }
-
-
 }

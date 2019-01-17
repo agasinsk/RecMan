@@ -26,8 +26,11 @@
 
     <string-array name="audio_formats">
         <item>MP3</item>
+        <item>AAC</item>
+        <item>M4A</item>
         <item>FLAC</item>
-        <item>AIFF</item>
+        <item>WAVE</item>
+        <item>WMA</item>
     </string-array>
 
     <string-array name="destinations">
@@ -44,4 +47,8 @@
     <string name="skip">Skip</string>
     <string name="cancel">Cancel</string>
 
+    <string name="toast_profile_created">Profile successfully created!</string>
+    <string name="toast_profile_set_default">Profile successfully set as default!</string>
+    <string name="toast_profile_deleted">Profile successfully deleted!</string>
+    <string name="toast_database_error">An error occurred during database operation. Please try again.</string>
 </resources>
