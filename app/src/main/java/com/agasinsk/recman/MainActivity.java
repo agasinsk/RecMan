@@ -17,7 +17,8 @@ import com.agasinsk.recman.helpers.ProfilesRepository;
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener,
         ProfilesFragment.OnFragmentInteractionListener,
-        ProfileNameDialogFragment.ProfileNameDialogListener {
+        ProfileNameDialogFragment.ProfileNameDialogListener,
+        AccountFragment.OnFragmentInteractionListener {
 
     private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 200;
     private final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 201;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity
     private ProfilesRepository mProfilesRepository;
     private ProfilesFragment mProfilesFragment;
     private HomeFragment mHomeFragment;
+    private AccountFragment mAccountFragment;
     private BottomNavigationView mBottomNavigation;
 
     @Override
@@ -68,6 +70,8 @@ public class MainActivity extends AppCompatActivity
                 loadFragment(mProfilesFragment);
                 return true;
             case R.id.navigation_account:
+                mAccountFragment = AccountFragment.newInstance();
+                loadFragment(mAccountFragment);
                 return true;
         }
         return false;

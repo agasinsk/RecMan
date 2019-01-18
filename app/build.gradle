@@ -5,6 +5,7 @@ android {
     defaultConfig {
         applicationId "com.agasinsk.recman"
         minSdkVersion 24
+        multiDexEnabled true
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -15,6 +16,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    dexOptions {
+        preDexLibraries = false
+        jumboMode = true
+        javaMaxHeapSize "4g"
     }
     compileOptions {
         sourceCompatibility = '1.8'
@@ -33,7 +39,9 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.github.adrielcafe:AndroidAudioConverter:0.0.8'
 
-    implementation 'com.microsoft.graph:msa-auth-for-android-adapter:0.10.+'
+    implementation('com.microsoft.identity.client:msal:0.1.+') {
+        exclude group: 'com.android.support', module: 'appcompat-v7'
+    }
 }
 
 repositories {
