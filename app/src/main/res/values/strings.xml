@@ -68,4 +68,6 @@
     <string name="title_text_error">Oops!</string>
     <string name="connect_text_error">\nSorry, can\'t connect to Microsoft Graph.\nHint: Check logcat for details.</string>
     <string name="send_mail_text_error">\nSorry, can\'t send the email.\nHint: Check logcat for details.</string>
+
+    <string name="defaultImageFileName">test.jpg</string>
 </resources>

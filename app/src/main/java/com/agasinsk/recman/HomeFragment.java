@@ -21,6 +21,9 @@ import android.widget.Toast;
 
 import com.agasinsk.recman.helpers.FilesHandler;
 import com.agasinsk.recman.helpers.ProfilesRepository;
+import com.microsoft.graph.concurrency.ICallback;
+import com.microsoft.graph.core.ClientException;
+import com.microsoft.graph.extensions.DriveItem;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +57,8 @@ public class HomeFragment extends Fragment {
     private ArrayAdapter<CharSequence> mFileHandlingAdapter;
     private ArrayAdapter<CharSequence> mAudioFormatAdapter;
 
+    private GraphServiceController mGraphServiceController;
+
     public HomeFragment() {
     }
 
@@ -85,6 +90,7 @@ public class HomeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
         mFilesHandler = new FilesHandler();
+        mGraphServiceController = new GraphServiceController(getContext());
     }
 
     @Override
@@ -193,7 +199,7 @@ public class HomeFragment extends Fragment {
                         @Override
                         public void onSuccess(File convertedFile) {
                             Log.i(RECMAN_TAG, "File " + convertedFile.getName() + " successfully converted!");
-                            // saveFileToOneDrive(convertedFile);
+                            saveFileToOneDrive(convertedFile);
                         }
 
                         @Override
@@ -209,6 +215,28 @@ public class HomeFragment extends Fragment {
         if (mProfileToSave != null) {
             mProfileToSave.setName(profileName);
             new SaveProfileTask().execute(mProfileToSave);
+        }
+    }
+
+    public void saveFileToOneDrive(File convertedFile) {
+        try {
+            //2. Upload the profile picture to OneDrive
+            mGraphServiceController.uploadFileToOneDrive(convertedFile, new ICallback<DriveItem>() {
+                @Override
+                public void success(DriveItem driveItem) {
+
+                    //3. Get the sharing link and if success, call step 4 helper
+                    Log.i("SendMailActivity", "Getting the sharing link ");
+                    // getSharingLink(driveItem, bytes);
+                }
+
+                @Override
+                public void failure(ClientException ex) {
+                    Log.e("SendMailActivity", "Exception on upload image to OneDrive ", ex);
+                }
+            });
+        } catch (Exception ex) {
+            Log.i("SendMailActivity", "Exception on send mail " + ex.getLocalizedMessage());
         }
     }
 

@@ -27,7 +27,6 @@ public class AccountFragment extends Fragment implements MSALAuthenticationCallb
 
     private static final String TAG = "AccountFragment";
 
-    private boolean mEnablePiiLogging = false;
     private User mUser;
     private Handler mHandler;
 
@@ -74,19 +73,16 @@ public class AccountFragment extends Fragment implements MSALAuthenticationCallb
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mFragmentView = inflater.inflate(R.layout.fragment_account, container, false);
-        // set up our views
+
         mConnectButton = mFragmentView.findViewById(R.id.connectButton);
         mConnectProgressBar = mFragmentView.findViewById(R.id.connectProgressBar);
         mTitleTextView = mFragmentView.findViewById(R.id.titleTextView);
         mDescriptionTextView = mFragmentView.findViewById(R.id.descriptionTextView);
 
         // add click listener
-        mConnectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showConnectingInProgressUI();
-                connect();
-            }
+        mConnectButton.setOnClickListener(v -> {
+            showConnectingInProgressUI();
+            connect();
         });
 
         return mFragmentView;
