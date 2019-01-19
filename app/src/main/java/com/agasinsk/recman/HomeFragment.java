@@ -202,13 +202,11 @@ public class HomeFragment extends Fragment {
             Log.e(RECMAN_TAG, "An error occurred while selecting files!", e);
         }
 
-        AudioFormat mAudioFormat = AudioFormat.valueOf(audioFormat);
-
         for (File file : filesToConvert) {
             mProgressBar.setVisibility(View.VISIBLE);
             AndroidAudioConverter.with(getContext())
                     .setFile(file)
-                    .setFormat(mAudioFormat)
+                    .setFormat(AudioFormat.valueOf(audioFormat))
                     .setCallback(new IConvertCallback() {
                         @Override
                         public void onSuccess(File convertedFile) {
@@ -230,8 +228,9 @@ public class HomeFragment extends Fragment {
             mGraphServiceController.uploadFileToOneDrive(convertedFile, new ICallback<DriveItem>() {
                 @Override
                 public void success(DriveItem driveItem) {
-                    Log.i(RECMAN_TAG, "Successfully uploaded file to OneDrive");
+                    Log.i(RECMAN_TAG, "Successfully uploaded file " + driveItem.name + " to OneDrive");
                     Toast.makeText(getContext(), "Successfully uploaded file " + driveItem.name + " to OneDrive", Toast.LENGTH_SHORT).show();
+                    removeFile(driveItem.name);
                     mProgressBar.setVisibility(View.GONE);
                 }
 
@@ -242,6 +241,16 @@ public class HomeFragment extends Fragment {
             });
         } catch (Exception ex) {
             Log.e(RECMAN_TAG, "Exception on file upload " + ex.getLocalizedMessage());
+        }
+    }
+
+    private void removeFile(String name) {
+
+        File fileToDelete = new File(selectedFolderPath, name);
+        if (fileToDelete.isFile() && fileToDelete.canRead()) {
+            if (!fileToDelete.delete()) {
+                Log.e(RECMAN_TAG, "An error occurred while deleting file " + name);
+            }
         }
     }
 
