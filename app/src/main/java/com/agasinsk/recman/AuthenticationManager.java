@@ -26,7 +26,7 @@ public class AuthenticationManager {
     private static AuthenticationManager INSTANCE;
     private static PublicClientApplication mPublicClientApplication;
     private AuthenticationResult mAuthResult;
-    private MSALAuthenticationCallback mActivityCallback;
+    private MicrosoftAuthenticationCallback mActivityCallback;
 
     private AuthenticationManager() {
     }
@@ -75,13 +75,13 @@ public class AuthenticationManager {
      * @param activity
      * @param authenticationCallback
      */
-    public void callAcquireToken(Activity activity, final MSALAuthenticationCallback authenticationCallback) {
+    public void callAcquireToken(Activity activity, final MicrosoftAuthenticationCallback authenticationCallback) {
         mActivityCallback = authenticationCallback;
         mPublicClientApplication.acquireToken(
                 activity, Constants.SCOPES, getAuthInteractiveCallback());
     }
 
-    public void callAcquireTokenSilent(User user, boolean forceRefresh, MSALAuthenticationCallback msalAuthenticationCallback) {
+    public void callAcquireTokenSilent(User user, boolean forceRefresh, MicrosoftAuthenticationCallback msalAuthenticationCallback) {
         mActivityCallback = msalAuthenticationCallback;
         mPublicClientApplication.acquireTokenSilentAsync(Constants.SCOPES, user, null, forceRefresh, getAuthSilentCallback());
     }
@@ -103,7 +103,7 @@ public class AuthenticationManager {
 
                 //invoke UI callback
                 if (mActivityCallback != null)
-                    mActivityCallback.onSuccess(mAuthResult);
+                    mActivityCallback.onMicrosoftAuthenticationSuccess(mAuthResult);
             }
 
             @Override
@@ -111,7 +111,7 @@ public class AuthenticationManager {
                 /* Failed to acquireToken */
                 Log.d(TAG, "Authentication failed: " + exception.toString());
                 if (mActivityCallback != null)
-                    mActivityCallback.onError(exception);
+                    mActivityCallback.onMicrosoftAuthenticationError(exception);
             }
 
             @Override
@@ -136,7 +136,7 @@ public class AuthenticationManager {
                 /* Store the auth result */
                 mAuthResult = authenticationResult;
                 if (mActivityCallback != null)
-                    mActivityCallback.onSuccess(mAuthResult);
+                    mActivityCallback.onMicrosoftAuthenticationSuccess(mAuthResult);
             }
 
             @Override
@@ -144,7 +144,7 @@ public class AuthenticationManager {
                 /* Failed to acquireToken */
                 Log.d(TAG, "Authentication failed: " + exception.toString());
                 if (mActivityCallback != null)
-                    mActivityCallback.onError(exception);
+                    mActivityCallback.onMicrosoftAuthenticationError(exception);
             }
 
             @Override
@@ -152,7 +152,7 @@ public class AuthenticationManager {
                 /* User canceled the authentication */
                 Log.d(TAG, "User cancelled login.");
                 if (mActivityCallback != null)
-                    mActivityCallback.onCancel();
+                    mActivityCallback.onMicrosoftAuthenticationCancel();
             }
         };
     }

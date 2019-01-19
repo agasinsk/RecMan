@@ -27,8 +27,6 @@ import com.microsoft.graph.extensions.DriveItem;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
 import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
@@ -41,16 +39,12 @@ public class HomeFragment extends Fragment {
     private String selectedFolderPath = "";
     private Uri selectedFolderUri = null;
     TextView selectedFolderTextView;
-    private AudioFormat mAudioFormat;
-
-    public void setDefaultProfile(Profile defaultProfile) {
-        this.defaultProfile = defaultProfile;
-    }
 
     private Profile defaultProfile;
     private Profile mProfileToSave;
 
     private ProfilesRepository mProfilesRepository;
+    private AudioFormat mAudioFormat;
     private FilesHandler mFilesHandler;
     private OnFragmentInteractionListener mListener;
     private View fragmentView;
@@ -62,10 +56,18 @@ public class HomeFragment extends Fragment {
     public HomeFragment() {
     }
 
+    public static HomeFragment newInstance() {
+        return newInstance(null);
+    }
+
     public static HomeFragment newInstance(Profile defaultProfile) {
         HomeFragment fragment = new HomeFragment();
         fragment.setDefaultProfile(defaultProfile);
         return fragment;
+    }
+
+    public void setDefaultProfile(Profile defaultProfile) {
+        this.defaultProfile = defaultProfile;
     }
 
     @Override
@@ -174,6 +176,13 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    public void saveProfileWithName(String profileName) {
+        if (mProfileToSave != null) {
+            mProfileToSave.setName(profileName);
+            new SaveProfileTask().execute(mProfileToSave);
+        }
+    }
+
     public void convertAudioFiles(String folderPath, String fileHandling, String audioFormat) {
         File directory = new File(folderPath);
         File[] filesToConvert = new File[0];
@@ -190,16 +199,16 @@ public class HomeFragment extends Fragment {
         }
 
         mAudioFormat = AudioFormat.valueOf(audioFormat);
-        // TODO: do this in a task
+
         for (File file : filesToConvert) {
             AndroidAudioConverter.with(getContext())
                     .setFile(file)
-                    .setFormat(AudioFormat.valueOf(audioFormat))
+                    .setFormat(mAudioFormat)
                     .setCallback(new IConvertCallback() {
                         @Override
                         public void onSuccess(File convertedFile) {
                             Log.i(RECMAN_TAG, "File " + convertedFile.getName() + " successfully converted!");
-                            saveFileToOneDrive(convertedFile);
+                            uploadConvertedFileToOneDrive(convertedFile);
                         }
 
                         @Override
@@ -211,32 +220,21 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public void saveProfileWithName(String profileName) {
-        if (mProfileToSave != null) {
-            mProfileToSave.setName(profileName);
-            new SaveProfileTask().execute(mProfileToSave);
-        }
-    }
-
-    public void saveFileToOneDrive(File convertedFile) {
+    public void uploadConvertedFileToOneDrive(File convertedFile) {
         try {
-            //2. Upload the profile picture to OneDrive
             mGraphServiceController.uploadFileToOneDrive(convertedFile, new ICallback<DriveItem>() {
                 @Override
                 public void success(DriveItem driveItem) {
-
-                    //3. Get the sharing link and if success, call step 4 helper
-                    Log.i("SendMailActivity", "Getting the sharing link ");
-                    // getSharingLink(driveItem, bytes);
+                    Log.i(RECMAN_TAG, "Successfully uploaded file to OneDrive");
                 }
 
                 @Override
                 public void failure(ClientException ex) {
-                    Log.e("SendMailActivity", "Exception on upload image to OneDrive ", ex);
+                    Log.e(RECMAN_TAG, "Exception on file upload to OneDrive ", ex);
                 }
             });
         } catch (Exception ex) {
-            Log.i("SendMailActivity", "Exception on send mail " + ex.getLocalizedMessage());
+            Log.e(RECMAN_TAG, "Exception on file upload " + ex.getLocalizedMessage());
         }
     }
 
@@ -296,48 +294,6 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), R.string.toast_profile_created, Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getContext(), R.string.toast_database_error, Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private class ConvertAudioFilesTask extends AsyncTask<File, Void, List<File>> {
-        protected List<File> doInBackground(File... filesToConvert) {
-            List<File> convertedFiles = new ArrayList<>();
-            IConvertCallback callback = new IConvertCallback() {
-                @Override
-                public void onSuccess(File convertedFile) {
-                    Log.i(RECMAN_TAG, "File " + convertedFile.getName() + " successfully converted!");
-                    convertedFiles.add(convertedFile);
-                }
-
-                @Override
-                public void onFailure(Exception error) {
-                    Log.e(RECMAN_TAG, "An error occurred during file conversion!", error);
-                }
-            };
-
-            for (File file : filesToConvert) {
-                AndroidAudioConverter.with(getContext())
-                        .setFile(file)
-                        .setFormat(AudioFormat.MP3)
-                        .setCallback(callback)
-                        .convert();
-            }
-            return convertedFiles;
-        }
-
-        protected void onProgressUpdate(Void... params) {
-            fragmentView.findViewById(R.id.homeProgressBar).setVisibility(View.VISIBLE);
-        }
-
-        protected void onPostExecute(List<File> result) {
-            fragmentView.findViewById(R.id.homeProgressBar).setVisibility(View.GONE);
-
-            // TODO: upload files to OneDrive
-            if (result.size() > 0) {
-                Toast.makeText(getContext(), R.string.toast_files_converted, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getContext(), R.string.toast_conversion_error, Toast.LENGTH_SHORT).show();
             }
         }
     }

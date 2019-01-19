@@ -1,6 +1,7 @@
 package com.agasinsk.recman;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.agasinsk.recman.helpers.ProfilesRepository;
+import com.microsoft.identity.client.PublicClientApplication;
 
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener,
@@ -158,6 +160,28 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Handles redirect response from https://login.microsoftonline.com/common and
+     * notifies the MSAL library that the user has completed the authentication
+     * dialog
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        PublicClientApplication publicClient = AuthenticationManager
+                .getInstance(getApplicationContext())
+                .getPublicClient();
+
+        if (publicClient != null) {
+            publicClient.handleInteractiveRequestRedirect(requestCode, resultCode, data);
+        }
+    }
+
     @Override
     public void askForProfileName() {
         DialogFragment dialog = new ProfileNameDialogFragment();
@@ -181,5 +205,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onProfileNameDialogClosed(String profileName) {
         mHomeFragment.saveProfileWithName(profileName);
+    }
+
+    @Override
+    public void onSuccessfulAuthentication(String userName) {
+        Log.d(RECMAN_TAG, "Successfully authenticated user " + userName);
+        mBottomNavigation.setSelectedItemId(R.id.navigation_home);
+        mHomeFragment = HomeFragment.newInstance();
+        loadFragment(mHomeFragment);
+    }
+
+    @Override
+    public void onAuthenticationError() {
+
     }
 }

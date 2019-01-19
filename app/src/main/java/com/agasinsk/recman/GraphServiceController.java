@@ -6,8 +6,6 @@ package com.agasinsk.recman;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.os.Environment;
 import android.util.Log;
 
 import com.microsoft.graph.concurrency.ICallback;
@@ -19,7 +17,6 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -57,7 +54,7 @@ class GraphServiceController {
                     "The file to byte array conversion method failed");
         }
         if (fileContent.length > 1024) {
-            uploadFileToOneDrive(fileContent, callback);
+            uploadFileToOneDrive(fileContent, fileToUpload.getName(), callback);
         }
     }
 
@@ -67,14 +64,13 @@ class GraphServiceController {
      * @param file  byte[] picture byte array
      * @param callback
      */
-    public void uploadFileToOneDrive(byte[] file, ICallback<DriveItem> callback) {
-
+    private void uploadFileToOneDrive(byte[] file, String fileName, ICallback<DriveItem> callback) {
         try {
             mGraphServiceClient
                     .getMe()
                     .getDrive()
                     .getRoot()
-                    .getItemWithPath("me.png")
+                    .getItemWithPath(fileName)
                     .getContent()
                     .buildRequest()
                     .put(file, callback);
@@ -85,7 +81,6 @@ class GraphServiceController {
     }
 
     public void getSharingLink(String id, ICallback<Permission> callback) {
-
         try {
             mGraphServiceClient
                     .getMe()
@@ -99,68 +94,17 @@ class GraphServiceController {
         }
     }
 
-    /**
-     * Gets a picture from the device external storage root folder
-     *
-     * @return byte[] the default picture in a byte array
-     */
-    private byte[] getDefaultPicture() {
-
-        int bytesRead;
-        byte[] bytes = new byte[1024];
-
-        String pathName = Environment.getExternalStorageDirectory() + "/";
-        String fileName = mContext.getString(R.string.defaultImageFileName);
-        File file = new File(pathName, fileName);
-        FileInputStream buf = null;
-        if (file.exists() && file.canRead()) {
-            int size = (int) file.length();
-
-            bytes = new byte[size];
-            try {
-                buf = new FileInputStream(file);
-                bytesRead = buf.read(bytes, 0, size);
-            } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        return bytes;
-    }
-
-    /**
-     * Gets the mounted state of device external storage
-     *
-     * @return
-     */
-    private StorageState getExternalStorageState() {
-        StorageState result = StorageState.NOT_AVAILABLE;
-        String state = Environment.getExternalStorageState();
-
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return StorageState.WRITEABLE;
-        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            return StorageState.READ_ONLY;
-        }
-        return result;
-    }
 
     /*
      * Opens a user dialog that shows the failure result of an exception and writes a log entry
      * */
     private void showException(Exception ex, String exceptionAction, String exceptionTitle, String exceptionMessage) {
         Log.e("GraphServiceController", exceptionAction + ex.getLocalizedMessage());
-        AlertDialog.Builder alertDialogBuidler = new AlertDialog.Builder(mContext);
-        alertDialogBuidler.setTitle(exceptionTitle);
-        alertDialogBuidler.setMessage(exceptionMessage);
-        alertDialogBuidler.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+        alertDialogBuilder.setTitle(exceptionTitle);
+        alertDialogBuilder.setMessage(exceptionMessage);
+        alertDialogBuilder.setNeutralButton("Ok", (dialog, which) -> {
         });
-        alertDialogBuidler.show();
+        alertDialogBuilder.show();
     }
 }

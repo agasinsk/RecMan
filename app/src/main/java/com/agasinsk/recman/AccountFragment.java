@@ -1,7 +1,6 @@
 package com.agasinsk.recman;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -23,9 +22,9 @@ import com.microsoft.identity.client.User;
 
 import java.util.List;
 
-public class AccountFragment extends Fragment implements MSALAuthenticationCallback {
+public class AccountFragment extends Fragment implements MicrosoftAuthenticationCallback {
 
-    private static final String TAG = "AccountFragment";
+    private static final String TAG = "ConnectFragment";
 
     private User mUser;
     private Handler mHandler;
@@ -71,6 +70,7 @@ public class AccountFragment extends Fragment implements MSALAuthenticationCallb
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         mFragmentView = inflater.inflate(R.layout.fragment_account, container, false);
 
@@ -82,7 +82,7 @@ public class AccountFragment extends Fragment implements MSALAuthenticationCallb
         // add click listener
         mConnectButton.setOnClickListener(v -> {
             showConnectingInProgressUI();
-            connect();
+            connectToMicrosoftGraph();
         });
 
         return mFragmentView;
@@ -95,8 +95,7 @@ public class AccountFragment extends Fragment implements MSALAuthenticationCallb
         mConnectProgressBar.setVisibility(View.VISIBLE);
     }
 
-    private void connect() {
-
+    private void connectToMicrosoftGraph() {
         AuthenticationManager authenticationManager = AuthenticationManager.getInstance(getContext());
 
         /* Attempt to get a user and acquireTokenSilent
@@ -109,8 +108,7 @@ public class AccountFragment extends Fragment implements MSALAuthenticationCallb
             if (users != null && users.size() == 1) {
                 /* We have 1 user */
                 mUser = users.get(0);
-                authenticationManager.callAcquireTokenSilent(
-                        mUser,
+                authenticationManager.callAcquireTokenSilent(mUser,
                         true,
                         this);
             } else {
@@ -145,36 +143,20 @@ public class AccountFragment extends Fragment implements MSALAuthenticationCallb
                 Toast.LENGTH_LONG).show();
     }
 
-    private void showMessage(final String msg) {
-        getHandler().post(() -> Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show());
-    }
-
-    private Handler getHandler() {
-        if (mHandler == null) {
-            return new Handler(getActivity().getMainLooper());
-        }
-
-        return mHandler;
-    }
-
     @Override
-    public void onSuccess(AuthenticationResult authenticationResult) {
+    public void onMicrosoftAuthenticationSuccess(AuthenticationResult authenticationResult) {
         mUser = authenticationResult.getUser();
-
-        String name = "";
-        String preferredUsername = "";
-
+        String userName = "";
         try {
-            // get the user info from the id token
-            name = authenticationResult.getUser().getName();
-            preferredUsername = authenticationResult.getUser().getDisplayableId();
-            Log.i(TAG, "Retrieved user name: " + name + " and id: " + preferredUsername);
-
+            userName = authenticationResult.getUser().getName();
+            Log.d(TAG, "Retrieved user name: " + userName);
         } catch (NullPointerException npe) {
             Log.e(TAG, npe.getMessage());
         }
-        // TODO: send name to mainActivity
 
+        Log.i(TAG, "Retrieved user name: " + userName);
+
+        mListener.onSuccessfulAuthentication(userName);
         new Thread(() -> resetUIForConnect());
     }
 
@@ -186,8 +168,8 @@ public class AccountFragment extends Fragment implements MSALAuthenticationCallb
     }
 
     @Override
-    public void onError(MsalException exception) {
-        // Check the exception type.
+    public void onMicrosoftAuthenticationError(MsalException exception) {
+
         if (exception instanceof MsalClientException) {
             // This means errors happened in the sdk itself, could be network, Json parse, etc. Check MsalError.java
             // for detailed list of the errors.
@@ -201,25 +183,32 @@ public class AccountFragment extends Fragment implements MSALAuthenticationCallb
         } else if (exception instanceof MsalUiRequiredException) {
             // This explicitly indicates that developer needs to prompt the user, it could be refresh token is expired, revoked
             // or user changes the password; or it could be that no token was found in the token cache.
-            AuthenticationManager mgr = AuthenticationManager.getInstance(getContext());
-
-            mgr.callAcquireToken(getActivity(), this);
+            AuthenticationManager authenticationManager = AuthenticationManager.getInstance(getContext());
+            authenticationManager.callAcquireToken(getActivity(), this);
         }
     }
 
-    @Override
-    public void onError(Exception exception) {
-        showMessage(exception.getMessage());
-        showConnectErrorUI(exception.getMessage());
+    private void showMessage(final String msg) {
+        getHandler().post(() -> Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show());
+    }
+
+    private Handler getHandler() {
+        if (mHandler == null) {
+            return new Handler(getActivity().getMainLooper());
+        }
+
+        return mHandler;
     }
 
     @Override
-    public void onCancel() {
+    public void onMicrosoftAuthenticationCancel() {
         showMessage("User cancelled the flow.");
         showConnectErrorUI("User cancelled the flow.");
     }
 
     public interface OnFragmentInteractionListener {
+        void onSuccessfulAuthentication(String userName);
 
+        void onAuthenticationError();
     }
 }
