@@ -42,11 +42,11 @@ public final class FileUtils {
         try {
             StorageManager mStorageManager =
                     (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
-            Class<?> storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
+            Class<?> storageVolumeClass = Class.forName("android.os.storage.StorageVolume");
             Method getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
-            Method getUuid = storageVolumeClazz.getMethod("getUuid");
-            Method getPath = storageVolumeClazz.getMethod("getPath");
-            Method isPrimary = storageVolumeClazz.getMethod("isPrimary");
+            Method getUuid = storageVolumeClass.getMethod("getUuid");
+            Method getPath = storageVolumeClass.getMethod("getPath");
+            Method isPrimary = storageVolumeClass.getMethod("isPrimary");
             Object result = getVolumeList.invoke(mStorageManager);
 
             final int length = Array.getLength(result);
