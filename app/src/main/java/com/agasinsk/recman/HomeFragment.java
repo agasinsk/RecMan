@@ -217,9 +217,12 @@ public class HomeFragment extends Fragment {
                         @Override
                         public void onFailure(Exception error) {
                             Log.e(RECMAN_TAG, "An error occurred during file conversion!", error);
+                            Toast.makeText(getContext(), R.string.toast_conversion_error, Toast.LENGTH_LONG).show();
+                            mProgressBar.setVisibility(View.GONE);
                         }
                     })
                     .convert();
+            Toast.makeText(getContext(), R.string.toast_conversion_started, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -229,7 +232,7 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void success(DriveItem driveItem) {
                     Log.i(RECMAN_TAG, "Successfully uploaded file " + driveItem.name + " to OneDrive");
-                    Toast.makeText(getContext(), "Successfully uploaded file " + driveItem.name + " to OneDrive", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Successfully uploaded file " + driveItem.name + " to OneDrive", Toast.LENGTH_LONG).show();
                     removeFile(driveItem.name);
                     mProgressBar.setVisibility(View.GONE);
                 }
