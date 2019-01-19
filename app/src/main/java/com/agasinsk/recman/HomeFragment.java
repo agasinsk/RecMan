@@ -125,7 +125,7 @@ public class HomeFragment extends Fragment {
                 R.array.file_handlings, android.R.layout.simple_spinner_item);
         mFileHandlingAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         fileHandlingSpinner.setAdapter(mFileHandlingAdapter);
-        
+
         // Setup SAVE_PROFILE button
         Button saveProfileButton = fragmentView.findViewById(R.id.saveProfileButton);
         saveProfileButton.setOnClickListener(v -> {

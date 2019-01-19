@@ -222,21 +222,7 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
     public interface OnFragmentInteractionListener {
         void onSuccessfulAuthentication(String userName);
 
-        void onUserSignOut();
-
         boolean isUserAuthenticated();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.signOutMenuItem:
-                AuthenticationManager.getInstance(getContext()).disconnect();
-                Toast.makeText(getActivity(), R.string.toast_sign_out, Toast.LENGTH_SHORT).show();
-                mListener.onUserSignOut();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 }

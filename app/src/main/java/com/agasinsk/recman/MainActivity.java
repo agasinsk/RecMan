@@ -273,16 +273,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSuccessfulAuthentication(String userName) {
         Log.d(RECMAN_TAG, "Successfully authenticated user " + userName);
-        showHomeFragment();
-    }
-
-    @Override
-    public void onUserSignOut() {
-        Log.d(RECMAN_TAG, "Successfully signed out user");
-        showHomeFragment();
-    }
-
-    private void showHomeFragment() {
+        isUserAuthenticated = true;
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
         mHomeFragment = HomeFragment.newInstance();
         loadFragment(mHomeFragment);
@@ -297,5 +288,23 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.account_options, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.signOutMenuItem:
+                if (isUserAuthenticated) {
+                    AuthenticationManager.getInstance(getApplicationContext()).disconnect();
+                    Toast.makeText(this, R.string.toast_sign_out, Toast.LENGTH_SHORT).show();
+                    isUserAuthenticated = false;
+                    mBottomNavigation.setSelectedItemId(R.id.navigation_account);
+                    mAccountFragment = AccountFragment.newInstance();
+                    loadFragment(mAccountFragment);
+                    return true;
+                }
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
