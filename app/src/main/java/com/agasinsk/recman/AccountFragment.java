@@ -13,6 +13,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.agasinsk.recman.microsoft.graph.AuthenticationManager;
+import com.agasinsk.recman.microsoft.graph.MicrosoftAuthenticationCallback;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalClientException;
 import com.microsoft.identity.client.MsalException;
@@ -35,7 +37,7 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
     private ProgressBar mConnectProgressBar;
     private Button mConnectButton;
     private TextView mDescriptionTextView;
-    private View mTitleTextView;
+    private TextView mTitleTextView;
 
     public AccountFragment() {
         // Required empty public constructor
@@ -85,7 +87,21 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
             connectToMicrosoftGraph();
         });
 
+        if (mListener.isUserAuthenticated()) {
+            showAlreadyConnectedUI();
+        }
+
         return mFragmentView;
+    }
+
+    private void showAlreadyConnectedUI() {
+        mConnectButton.setVisibility(View.GONE);
+        mTitleTextView.setVisibility(View.VISIBLE);
+        mTitleTextView.setText(R.string.ok);
+
+        mDescriptionTextView.setVisibility(View.VISIBLE);
+        mDescriptionTextView.setText(R.string.already_authenticated_text);
+        mConnectProgressBar.setVisibility(View.GONE);
     }
 
     private void showConnectingInProgressUI() {
@@ -169,7 +185,6 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
 
     @Override
     public void onMicrosoftAuthenticationError(MsalException exception) {
-
         if (exception instanceof MsalClientException) {
             // This means errors happened in the sdk itself, could be network, Json parse, etc. Check MsalError.java
             // for detailed list of the errors.
@@ -209,6 +224,6 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
     public interface OnFragmentInteractionListener {
         void onSuccessfulAuthentication(String userName);
 
-        void onAuthenticationError();
+        boolean isUserAuthenticated();
     }
 }

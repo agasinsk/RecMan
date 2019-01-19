@@ -19,8 +19,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.agasinsk.recman.helpers.FileUtils;
 import com.agasinsk.recman.helpers.FilesHandler;
 import com.agasinsk.recman.helpers.ProfilesRepository;
+import com.agasinsk.recman.microsoft.graph.GraphServiceController;
 import com.microsoft.graph.concurrency.ICallback;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.extensions.DriveItem;
@@ -146,9 +148,14 @@ public class HomeFragment extends Fragment {
         // Setup convertFAB
         FloatingActionButton fab = fragmentView.findViewById(R.id.goFab);
         fab.setOnClickListener(view -> {
-            String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
-            String audioFormat = audioFormatSpinner.getSelectedItem().toString();
-            convertAudioFiles(selectedFolderPath, fileHandling, audioFormat);
+            if (mListener.checkIfUserIsAuthenticated()) {
+                String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
+                String audioFormat = audioFormatSpinner.getSelectedItem().toString();
+                convertAudioFiles(selectedFolderPath, fileHandling, audioFormat);
+            } else {
+                Toast.makeText(getContext(), R.string.toast_user_not_found_error, Toast.LENGTH_SHORT).show();
+                mListener.onSilentAuthenticationFailed();
+            }
         });
 
         new GetDefaultProfileTask().execute(defaultProfile != null);
@@ -226,6 +233,7 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void success(DriveItem driveItem) {
                     Log.i(RECMAN_TAG, "Successfully uploaded file to OneDrive");
+                    Toast.makeText(getContext(), "Successfully uploaded file " + driveItem.name + " to OneDrive", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -240,6 +248,8 @@ public class HomeFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         void askForProfileName();
+        void onSilentAuthenticationFailed();
+        boolean checkIfUserIsAuthenticated();
     }
 
     private class GetDefaultProfileTask extends AsyncTask<Boolean, Void, Profile> {

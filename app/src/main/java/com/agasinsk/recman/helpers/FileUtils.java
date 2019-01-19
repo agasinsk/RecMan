@@ -1,4 +1,4 @@
-package com.agasinsk.recman;
+package com.agasinsk.recman.helpers;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -13,8 +13,7 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 
-final class FileUtils {
-    static String TAG = "TAG";
+public final class FileUtils {
     private static final String PRIMARY_VOLUME_NAME = "primary";
 
     @Nullable

@@ -2,12 +2,13 @@
  * Copyright (c) Microsoft. All rights reserved. Licensed under the MIT license.
  * See LICENSE in the project root for license information.
  */
-package com.agasinsk.recman;
+package com.agasinsk.recman.microsoft.graph;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
 
+import com.agasinsk.recman.R;
 import com.microsoft.graph.concurrency.ICallback;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.IGraphServiceClient;
@@ -23,7 +24,7 @@ import java.io.IOException;
  * Handles the creation of the message and using the GraphServiceClient to
  * upload the files to OneDrive.
  */
-class GraphServiceController {
+public class GraphServiceController {
 
     private final Context mContext;
 
@@ -58,19 +59,13 @@ class GraphServiceController {
         }
     }
 
-    /**
-     * Uploads a user picture as byte array to the user's OneDrive root folder
-     *
-     * @param file  byte[] picture byte array
-     * @param callback
-     */
     private void uploadFileToOneDrive(byte[] file, String fileName, ICallback<DriveItem> callback) {
         try {
             mGraphServiceClient
                     .getMe()
                     .getDrive()
                     .getRoot()
-                    .getItemWithPath(fileName)
+                    .getItemWithPath(R.string.default_one_drive_folder + fileName)
                     .getContent()
                     .buildRequest()
                     .put(file, callback);
@@ -93,7 +88,6 @@ class GraphServiceController {
             showException(ex, "exception on get OneDrive sharing link ", "Get sharing link failed", "The get sharing link method failed");
         }
     }
-
 
     /*
      * Opens a user dialog that shows the failure result of an exception and writes a log entry

@@ -12,21 +12,31 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.agasinsk.recman.helpers.ProfilesRepository;
+import com.agasinsk.recman.microsoft.graph.AuthenticationManager;
+import com.agasinsk.recman.microsoft.graph.MicrosoftAuthenticationCallback;
+import com.microsoft.identity.client.AuthenticationResult;
+import com.microsoft.identity.client.MsalException;
 import com.microsoft.identity.client.PublicClientApplication;
+import com.microsoft.identity.client.User;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener,
         ProfilesFragment.OnFragmentInteractionListener,
         ProfileNameDialogFragment.ProfileNameDialogListener,
-        AccountFragment.OnFragmentInteractionListener {
+        AccountFragment.OnFragmentInteractionListener,
+        MicrosoftAuthenticationCallback {
 
     private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 200;
     private final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 201;
     private final int PERMISSIONS_REQUEST_INTERNET = 202;
     private final int PERMISSIONS_REQUEST_ACCESS_NETWORK_STATE = 203;
-    private final String RECMAN_TAG = "REC:Main";
+    private final String RECMAN_TAG = "RecMan:MainActivity";
+    private boolean isUserAuthenticated;
 
     private ProfilesRepository mProfilesRepository;
     private ProfilesFragment mProfilesFragment;
@@ -51,6 +61,55 @@ public class MainActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkForPermissions();
         }
+
+        tryToConnectToMicrosoftGraphSilently();
+    }
+
+    private void tryToConnectToMicrosoftGraphSilently() {
+        AuthenticationManager authenticationManager = AuthenticationManager.getInstance(getApplicationContext());
+        try {
+            List<User> users = authenticationManager.getPublicClient().getUsers();
+
+            if (users != null && users.size() == 1) {
+                authenticationManager.callAcquireTokenSilent(users.get(0),
+                        true,
+                        this);
+            } else {
+                Log.e(RECMAN_TAG, "No user was found during authentication");
+                //TODO: add toast and move to Account fragment
+            }
+        } catch (Exception e) {
+            String errorText = getResources().getString(R.string.title_text_error);
+            //showConnectErrorUI(errorText);
+        }
+    }
+
+    @Override
+    public void onMicrosoftAuthenticationSuccess(AuthenticationResult authenticationResult) {
+        String userName;
+        try {
+            userName = authenticationResult.getUser().getName();
+            isUserAuthenticated = true;
+            Log.d(RECMAN_TAG, "Successfully authenticated user " + userName);
+            Toast.makeText(getApplicationContext(), "Successfully authenticated user " + userName, Toast.LENGTH_SHORT).show();
+        } catch (NullPointerException npe) {
+            Log.e(RECMAN_TAG, npe.getMessage(), npe);
+            Toast.makeText(getApplicationContext(), R.string.toast_user_not_found_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onMicrosoftAuthenticationError(MsalException exception) {
+        Log.e(RECMAN_TAG, "An error occurred during authentication", exception);
+        isUserAuthenticated = false;
+        Toast.makeText(getApplicationContext(), R.string.toast_connect_error, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onMicrosoftAuthenticationCancel() {
+        Log.e(RECMAN_TAG, "Authentication cancelled");
+        isUserAuthenticated = false;
+        Toast.makeText(getApplicationContext(), "Authentication cancelled", Toast.LENGTH_SHORT).show();
     }
 
     private void loadFragment(Fragment fragment) {
@@ -164,10 +223,6 @@ public class MainActivity extends AppCompatActivity
      * Handles redirect response from https://login.microsoftonline.com/common and
      * notifies the MSAL library that the user has completed the authentication
      * dialog
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -186,6 +241,18 @@ public class MainActivity extends AppCompatActivity
     public void askForProfileName() {
         DialogFragment dialog = new ProfileNameDialogFragment();
         dialog.show(getSupportFragmentManager(), "profileNameDialog");
+    }
+
+    @Override
+    public boolean checkIfUserIsAuthenticated() {
+        return isUserAuthenticated;
+    }
+
+    public void onSilentAuthenticationFailed() {
+        Log.d(RECMAN_TAG, "Silent authentication failed. Opening Account Fragment.");
+        mBottomNavigation.setSelectedItemId(R.id.navigation_account);
+        mAccountFragment = AccountFragment.newInstance();
+        loadFragment(mAccountFragment);
     }
 
     @Override
@@ -216,7 +283,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onAuthenticationError() {
-
+    public boolean isUserAuthenticated() {
+        return isUserAuthenticated;
     }
 }
