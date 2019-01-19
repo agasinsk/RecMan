@@ -3,8 +3,8 @@ package com.agasinsk.recman;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +21,7 @@ public class ProfileNameDialogFragment extends DialogFragment {
     }
 
     // Use this instance of the interface to deliver action events
-    ProfileNameDialogListener mListener;
+    private ProfileNameDialogListener mListener;
 
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
     @Override
@@ -38,6 +38,7 @@ public class ProfileNameDialogFragment extends DialogFragment {
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
@@ -50,23 +51,17 @@ public class ProfileNameDialogFragment extends DialogFragment {
 
         builder.setView(dialogView)
                 .setMessage(R.string.dialog_set_profile_name)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
+                .setPositiveButton(R.string.ok, (dialog, id) -> {
 
-                        EditText nameEditText = dialogView.findViewById(R.id.profileNameEditText);
-                        String name = nameEditText.getText().toString();
-                        if ("".equals(name)) {
-                            Toast.makeText(getContext(), "You must give a name!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            mListener.onProfileNameDialogClosed(name);
-                        }
+                    EditText nameEditText = dialogView.findViewById(R.id.profileNameEditText);
+                    String name = nameEditText.getText().toString();
+                    if ("".equals(name)) {
+                        Toast.makeText(getContext(), "You must give a name!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        mListener.onProfileNameDialogClosed(name);
                     }
                 })
-                .setNegativeButton(R.string.skip, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onProfileNameDialogClosed("");
-                    }
-                });
+                .setNegativeButton(R.string.skip, (dialog, id) -> mListener.onProfileNameDialogClosed(""));
 
         return builder.create();
 

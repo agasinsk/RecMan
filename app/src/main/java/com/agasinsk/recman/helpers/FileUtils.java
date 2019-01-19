@@ -36,7 +36,6 @@ public final class FileUtils {
         } else return volumePath;
     }
 
-
     @SuppressLint("ObsoleteSdkInt")
     private static String getVolumePath(final String volumeId, Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return null;
@@ -78,7 +77,6 @@ public final class FileUtils {
         if (split.length > 0) return split[0];
         else return null;
     }
-
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private static String getDocumentPathFromTreeUri(final Uri treeUri) {

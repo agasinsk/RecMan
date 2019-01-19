@@ -4,8 +4,6 @@
  */
 package com.agasinsk.recman.microsoft.graph;
 
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.content.Context;
 import android.util.Log;
 
@@ -15,8 +13,6 @@ import com.microsoft.graph.core.IClientConfig;
 import com.microsoft.graph.extensions.GraphServiceClient;
 import com.microsoft.graph.extensions.IGraphServiceClient;
 import com.microsoft.graph.http.IHttpRequest;
-
-import java.io.IOException;
 
 /**
  * Singleton class that manages a GraphServiceClient object.
@@ -35,7 +31,6 @@ public class GraphServiceClientManager implements IAuthenticationProvider {
      * Appends an access token obtained from the {@link AuthenticationManager} class to the
      * Authorization header of the request.
      *
-     * @param request
      */
     @Override
     public void authenticateRequest(IHttpRequest request) {
@@ -45,12 +40,6 @@ public class GraphServiceClientManager implements IAuthenticationProvider {
                     .getAccessToken());
 
             Log.i("Connect", "Request: " + request.toString());
-        } catch (AuthenticatorException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (OperationCanceledException e) {
-            e.printStackTrace();
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -67,7 +56,7 @@ public class GraphServiceClientManager implements IAuthenticationProvider {
         return getGraphServiceClient(this);
     }
 
-    public synchronized IGraphServiceClient getGraphServiceClient(IAuthenticationProvider authenticationProvider) {
+    private synchronized IGraphServiceClient getGraphServiceClient(IAuthenticationProvider authenticationProvider) {
         if (mGraphServiceClient == null) {
             IClientConfig clientConfig = DefaultClientConfig.createWithAuthenticationProvider(
                     authenticationProvider

@@ -10,8 +10,8 @@ import com.agasinsk.recman.Profile;
 import java.util.ArrayList;
 
 public class ProfilesRepository {
-    // TODO: do this in a task
-    protected ProfilesDbHelper mDbHelper;
+
+    private final ProfilesDbHelper mDbHelper;
 
     public ProfilesRepository(Context context) {
         mDbHelper = new ProfilesDbHelper(context);

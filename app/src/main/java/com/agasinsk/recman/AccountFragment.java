@@ -3,6 +3,7 @@ package com.agasinsk.recman;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,7 +33,6 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
     private Handler mHandler;
 
     private OnFragmentInteractionListener mListener;
-    private View mFragmentView;
 
     private ProgressBar mConnectProgressBar;
     private Button mConnectButton;
@@ -65,16 +65,11 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        mFragmentView = inflater.inflate(R.layout.fragment_account, container, false);
+        View mFragmentView = inflater.inflate(R.layout.fragment_account, container, false);
 
         mConnectButton = mFragmentView.findViewById(R.id.connectButton);
         mConnectProgressBar = mFragmentView.findViewById(R.id.connectProgressBar);
@@ -173,7 +168,7 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
         Log.i(TAG, "Retrieved user name: " + userName);
 
         mListener.onSuccessfulAuthentication(userName);
-        new Thread(() -> resetUIForConnect());
+        new Thread(this::resetUIForConnect);
     }
 
     private void resetUIForConnect() {

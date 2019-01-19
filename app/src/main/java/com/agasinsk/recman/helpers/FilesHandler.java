@@ -10,32 +10,51 @@ import java.util.Date;
 import java.util.List;
 
 public class FilesHandler {
-    public File[] getFilesWithHandling(File[] allFiles, String fileHandling) throws IOException {
+    public List<File> getFilesWithHandling(File[] allFiles, String fileHandling, String audioFormat) throws IOException {
         if (allFiles.length == 0) {
             throw new IOException("No files to monitor in the dir");
         }
 
         if (fileHandling == null || fileHandling.equals("")) {
-            return allFiles;
+            return Arrays.asList(allFiles);
         }
+
+        List<File> filesToResolve = new ArrayList<>();
+        if (audioFormat != null && !audioFormat.equals("")) {
+            String fileExtension = "." + audioFormat.toLowerCase();
+            filesToResolve = new ArrayList<>();
+            for (File file : allFiles) {
+                if (!file.getName().toLowerCase().endsWith(fileExtension)) {
+                    filesToResolve.add(file);
+                }
+            }
+        }
+
+        if (filesToResolve.size() == 0) {
+            return filesToResolve;
+        }
+
         switch (fileHandling) {
             case "Take all from today":
-                return getFilesFromToday(allFiles);
+                return getFilesFromToday(filesToResolve);
             case "Take last one":
-                return getLastFile(allFiles);
+                return getLastFile(filesToResolve);
             case "Take all":
-                return allFiles;
+                return filesToResolve;
         }
 
-        return allFiles;
+        return filesToResolve;
     }
 
-    private File[] getLastFile(File[] allFiles) {
-        Arrays.sort(allFiles, Comparator.comparingLong(File::lastModified).reversed());
-        return new File[]{allFiles[0]};
+    private List<File> getLastFile(List<File> allFiles) {
+        allFiles.sort(Comparator.comparingLong(File::lastModified).reversed());
+
+        List<File> firstFile = new ArrayList<>();
+        firstFile.add(allFiles.get(0));
+        return firstFile;
     }
 
-    private File[] getFilesFromToday(File[] allFiles) {
+    private List<File> getFilesFromToday(List<File> allFiles) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -1);
 
@@ -50,7 +69,6 @@ public class FilesHandler {
             }
         }
 
-        File[] filesArray = filesFromToday.toArray(new File[0]);
-        return filesArray;
+        return filesFromToday;
     }
 }

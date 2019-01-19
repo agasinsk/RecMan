@@ -4,8 +4,6 @@
  */
 package com.agasinsk.recman.microsoft.graph;
 
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
@@ -15,8 +13,6 @@ import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalException;
 import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.User;
-
-import java.io.IOException;
 
 /**
  * Handles setup of OAuth library in API clients.
@@ -41,7 +37,7 @@ public class AuthenticationManager {
         return INSTANCE;
     }
 
-    public static synchronized void resetInstance() {
+    private static synchronized void resetInstance() {
         INSTANCE = null;
     }
 
@@ -50,7 +46,7 @@ public class AuthenticationManager {
      *
      * @return mAccessToken
      */
-    public String getAccessToken() throws AuthenticatorException, IOException, OperationCanceledException {
+    public String getAccessToken() {
         return mAuthResult.getAccessToken();
     }
 
@@ -72,8 +68,6 @@ public class AuthenticationManager {
      * Authenticates the user and lets the user authorize the app for the requested permissions.
      * An authentication token is returned via the getAuthInteractiveCalback method
      *
-     * @param activity
-     * @param authenticationCallback
      */
     public void callAcquireToken(Activity activity, final MicrosoftAuthenticationCallback authenticationCallback) {
         mActivityCallback = authenticationCallback;

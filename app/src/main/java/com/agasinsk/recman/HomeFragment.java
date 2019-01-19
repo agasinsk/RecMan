@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -29,6 +30,8 @@ import com.microsoft.graph.extensions.DriveItem;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
 import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
@@ -39,17 +42,17 @@ public class HomeFragment extends Fragment {
     private final int SOURCE_FOLDER_REQUEST_CODE = 100;
 
     private String selectedFolderPath = "";
-    private Uri selectedFolderUri = null;
-    TextView selectedFolderTextView;
+    private TextView selectedFolderTextView;
 
     private Profile defaultProfile;
     private Profile mProfileToSave;
 
     private ProfilesRepository mProfilesRepository;
-    private AudioFormat mAudioFormat;
     private FilesHandler mFilesHandler;
     private OnFragmentInteractionListener mListener;
+
     private View fragmentView;
+    private ProgressBar mProgressBar;
     private ArrayAdapter<CharSequence> mFileHandlingAdapter;
     private ArrayAdapter<CharSequence> mAudioFormatAdapter;
 
@@ -68,7 +71,7 @@ public class HomeFragment extends Fragment {
         return fragment;
     }
 
-    public void setDefaultProfile(Profile defaultProfile) {
+    private void setDefaultProfile(Profile defaultProfile) {
         this.defaultProfile = defaultProfile;
     }
 
@@ -98,7 +101,7 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.fragment_home, container, false);
@@ -158,12 +161,13 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        mProgressBar = fragmentView.findViewById(R.id.homeProgressBar);
         new GetDefaultProfileTask().execute(defaultProfile != null);
 
         return fragmentView;
     }
 
-    public void performFolderSearch() {
+    private void performFolderSearch() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         startActivityForResult(intent, SOURCE_FOLDER_REQUEST_CODE);
     }
@@ -174,7 +178,7 @@ public class HomeFragment extends Fragment {
 
         if (requestCode == SOURCE_FOLDER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
-                selectedFolderUri = resultData.getData();
+                Uri selectedFolderUri = resultData.getData();
                 Log.i(RECMAN_TAG, "Uri: " + selectedFolderUri.toString());
                 selectedFolderPath = FileUtils.getFullPathFromTreeUri(selectedFolderUri, getActivity());
 
@@ -190,14 +194,14 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public void convertAudioFiles(String folderPath, String fileHandling, String audioFormat) {
+    private void convertAudioFiles(String folderPath, String fileHandling, String audioFormat) {
         File directory = new File(folderPath);
-        File[] filesToConvert = new File[0];
+        List<File> filesToConvert = new ArrayList<>();
 
         try {
-            File[] files = directory.listFiles(f -> f.isFile());
-            filesToConvert = mFilesHandler.getFilesWithHandling(files, fileHandling);
-            if (filesToConvert.length == 0) {
+            File[] files = directory.listFiles(File::isFile);
+            filesToConvert = mFilesHandler.getFilesWithHandling(files, fileHandling, audioFormat);
+            if (filesToConvert.size() == 0) {
                 Log.e(RECMAN_TAG, "No files were found to be converted!");
                 Toast.makeText(getContext(), "No files were found to be converted!", Toast.LENGTH_SHORT).show();
             }
@@ -205,9 +209,10 @@ public class HomeFragment extends Fragment {
             Log.e(RECMAN_TAG, "An error occurred while selecting files!", e);
         }
 
-        mAudioFormat = AudioFormat.valueOf(audioFormat);
+        AudioFormat mAudioFormat = AudioFormat.valueOf(audioFormat);
 
         for (File file : filesToConvert) {
+            mProgressBar.setVisibility(View.VISIBLE);
             AndroidAudioConverter.with(getContext())
                     .setFile(file)
                     .setFormat(mAudioFormat)
@@ -227,13 +232,14 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public void uploadConvertedFileToOneDrive(File convertedFile) {
+    private void uploadConvertedFileToOneDrive(File convertedFile) {
         try {
             mGraphServiceController.uploadFileToOneDrive(convertedFile, new ICallback<DriveItem>() {
                 @Override
                 public void success(DriveItem driveItem) {
                     Log.i(RECMAN_TAG, "Successfully uploaded file to OneDrive");
                     Toast.makeText(getContext(), "Successfully uploaded file " + driveItem.name + " to OneDrive", Toast.LENGTH_SHORT).show();
+                    mProgressBar.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -248,7 +254,9 @@ public class HomeFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         void askForProfileName();
+
         void onSilentAuthenticationFailed();
+
         boolean checkIfUserIsAuthenticated();
     }
 

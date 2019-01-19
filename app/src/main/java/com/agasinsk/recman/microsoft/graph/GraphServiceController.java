@@ -28,10 +28,6 @@ public class GraphServiceController {
 
     private final Context mContext;
 
-    public enum StorageState {
-        NOT_AVAILABLE, WRITEABLE, READ_ONLY
-    }
-
     private final IGraphServiceClient mGraphServiceClient;
 
     public GraphServiceController(Context context) {
@@ -61,31 +57,18 @@ public class GraphServiceController {
 
     private void uploadFileToOneDrive(byte[] file, String fileName, ICallback<DriveItem> callback) {
         try {
+            String folder = mContext.getResources().getString(R.string.default_one_drive_folder);
             mGraphServiceClient
                     .getMe()
                     .getDrive()
                     .getRoot()
-                    .getItemWithPath(R.string.default_one_drive_folder + fileName)
+                    .getItemWithPath(folder + fileName)
                     .getContent()
                     .buildRequest()
                     .put(file, callback);
         } catch (Exception ex) {
             showException(ex, "exception on upload picture to OneDrive ", "Upload picture failed",
                     "The upload picture method failed");
-        }
-    }
-
-    public void getSharingLink(String id, ICallback<Permission> callback) {
-        try {
-            mGraphServiceClient
-                    .getMe()
-                    .getDrive()
-                    .getItems(id)
-                    .getCreateLink(null, "view")
-                    .buildRequest()
-                    .post(callback);
-        } catch (Exception ex) {
-            showException(ex, "exception on get OneDrive sharing link ", "Get sharing link failed", "The get sharing link method failed");
         }
     }
 

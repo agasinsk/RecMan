@@ -3,6 +3,7 @@ package com.agasinsk.recman;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.agasinsk.recman.helpers.ProfilesRepository;
@@ -22,7 +22,6 @@ public class ProfilesFragment extends Fragment {
     private final String LOG_TAG = "ProfilesFragment";
     private OnFragmentInteractionListener mListener;
     private View fragmentView;
-    private ListView profilesListView;
     private ProfileListAdapter mAdapter;
     private Profile selectedProfile;
     private ProfilesRepository mProfilesRepository;
@@ -60,7 +59,7 @@ public class ProfilesFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.fragment_profiles, container, false);
@@ -96,7 +95,7 @@ public class ProfilesFragment extends Fragment {
         });
 
         // Setup the list view
-        profilesListView = fragmentView.findViewById(R.id.profilesListView);
+        ListView profilesListView = fragmentView.findViewById(R.id.profilesListView);
         mAdapter = new ProfileListAdapter(getContext(), R.layout.profile_list_item, new ArrayList<>());
         profilesListView.setAdapter(mAdapter);
         new GetProfilesTask().execute();

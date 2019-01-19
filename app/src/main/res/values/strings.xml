@@ -46,6 +46,7 @@
     <string name="ok">OK</string>
     <string name="skip">Skip</string>
     <string name="cancel">Cancel</string>
+    <string name="name_profile_hint">Type a name...</string>
 
     <string name="toast_profile_created">Profile successfully created!</string>
     <string name="toast_profile_set_default">Profile successfully set as default!</string>

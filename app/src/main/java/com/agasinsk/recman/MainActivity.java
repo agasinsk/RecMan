@@ -3,8 +3,8 @@ package com.agasinsk.recman;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -57,11 +57,7 @@ public class MainActivity extends AppCompatActivity
         loadFragment(HomeFragment.newInstance(null));
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
 
-        // Permissions check
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkForPermissions();
-        }
-
+        checkForPermissions();
         tryToConnectToMicrosoftGraphSilently();
     }
 
@@ -75,12 +71,10 @@ public class MainActivity extends AppCompatActivity
                         true,
                         this);
             } else {
-                Log.e(RECMAN_TAG, "No user was found during authentication");
-                //TODO: add toast and move to Account fragment
+                onSilentAuthenticationFailed();
             }
         } catch (Exception e) {
-            String errorText = getResources().getString(R.string.title_text_error);
-            //showConnectErrorUI(errorText);
+            onSilentAuthenticationFailed();
         }
     }
 
@@ -119,7 +113,7 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+    private final BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = item -> {
         switch (item.getItemId()) {
             case R.id.navigation_home:
@@ -182,7 +176,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -190,7 +184,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     Log.e(RECMAN_TAG, "WRITE Permission denied");
                 }
-                return;
+                break;
             }
             case PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -198,7 +192,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     Log.e(RECMAN_TAG, "READ Permission denied");
                 }
-                return;
+                break;
             }
             case PERMISSIONS_REQUEST_INTERNET: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -206,7 +200,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     Log.e(RECMAN_TAG, "INTERNET Permission denied");
                 }
-                return;
+                break;
             }
             case PERMISSIONS_REQUEST_ACCESS_NETWORK_STATE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -214,7 +208,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     Log.e(RECMAN_TAG, "ACCESS_NETWORK_STATE Permission denied");
                 }
-                return;
+                break;
             }
         }
     }

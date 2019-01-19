@@ -1,7 +1,9 @@
 package com.agasinsk.recman;
 
+import android.support.annotation.NonNull;
+
 public class Profile {
-    int id;
+    private int id;
     String name;
     String sourceFolder;
     String fileHandling;
@@ -35,12 +37,12 @@ public class Profile {
     }
 
     public Profile(String sourceFolder, String fileHandling, String audioFormat) {
-        this.id = id;
         this.sourceFolder = sourceFolder;
         this.fileHandling = fileHandling;
         this.audioFormat = audioFormat;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return this.name + " " + this.sourceFolder + " " + this.fileHandling + " " + this.audioFormat;

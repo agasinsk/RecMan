@@ -2,7 +2,7 @@ package com.agasinsk.recman.helpers;
 
 import android.provider.BaseColumns;
 
-public final class ProfilesContract {
+final class ProfilesContract {
     // To prevent someone from accidentally instantiating the contract class,
     // make the constructor private.
     private ProfilesContract() {}
