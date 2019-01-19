@@ -1,12 +1,15 @@
 package com.agasinsk.recman;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -219,6 +222,21 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
     public interface OnFragmentInteractionListener {
         void onSuccessfulAuthentication(String userName);
 
+        void onUserSignOut();
+
         boolean isUserAuthenticated();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.signOutMenuItem:
+                AuthenticationManager.getInstance(getContext()).disconnect();
+                Toast.makeText(getActivity(), R.string.toast_sign_out, Toast.LENGTH_SHORT).show();
+                mListener.onUserSignOut();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

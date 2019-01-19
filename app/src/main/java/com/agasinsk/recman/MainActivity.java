@@ -12,6 +12,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.agasinsk.recman.helpers.ProfilesRepository;
@@ -271,6 +273,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSuccessfulAuthentication(String userName) {
         Log.d(RECMAN_TAG, "Successfully authenticated user " + userName);
+        showHomeFragment();
+    }
+
+    @Override
+    public void onUserSignOut() {
+        Log.d(RECMAN_TAG, "Successfully signed out user");
+        showHomeFragment();
+    }
+
+    private void showHomeFragment() {
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
         mHomeFragment = HomeFragment.newInstance();
         loadFragment(mHomeFragment);
@@ -279,5 +291,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean isUserAuthenticated() {
         return isUserAuthenticated;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.account_options, menu);
+        return true;
     }
 }

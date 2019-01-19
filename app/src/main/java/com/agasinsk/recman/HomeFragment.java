@@ -125,15 +125,7 @@ public class HomeFragment extends Fragment {
                 R.array.file_handlings, android.R.layout.simple_spinner_item);
         mFileHandlingAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         fileHandlingSpinner.setAdapter(mFileHandlingAdapter);
-
-        // Setup spinner for destination
-        final Spinner destinationSpinner = fragmentView.findViewById(R.id.destinationSpinner);
-        ArrayAdapter<CharSequence> DestinationsAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.destinations, android.R.layout.simple_spinner_item);
-        DestinationsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        destinationSpinner.setAdapter(DestinationsAdapter);
-
+        
         // Setup SAVE_PROFILE button
         Button saveProfileButton = fragmentView.findViewById(R.id.saveProfileButton);
         saveProfileButton.setOnClickListener(v -> {
@@ -149,6 +141,7 @@ public class HomeFragment extends Fragment {
         });
 
         // Setup convertFAB
+
         FloatingActionButton fab = fragmentView.findViewById(R.id.goFab);
         fab.setOnClickListener(view -> {
             if (mListener.checkIfUserIsAuthenticated()) {
