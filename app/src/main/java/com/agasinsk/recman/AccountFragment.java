@@ -37,7 +37,6 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
     private ProgressBar mConnectProgressBar;
     private Button mConnectButton;
     private TextView mDescriptionTextView;
-    private TextView mTitleTextView;
 
     public AccountFragment() {
         // Required empty public constructor
@@ -73,7 +72,6 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
 
         mConnectButton = mFragmentView.findViewById(R.id.connectButton);
         mConnectProgressBar = mFragmentView.findViewById(R.id.connectProgressBar);
-        mTitleTextView = mFragmentView.findViewById(R.id.titleTextView);
         mDescriptionTextView = mFragmentView.findViewById(R.id.descriptionTextView);
 
         // add click listener
@@ -91,17 +89,14 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
 
     private void showAlreadyConnectedUI() {
         mConnectButton.setVisibility(View.GONE);
-        mTitleTextView.setVisibility(View.VISIBLE);
-        mTitleTextView.setText(R.string.ok);
-
+        mConnectProgressBar.setVisibility(View.GONE);
         mDescriptionTextView.setVisibility(View.VISIBLE);
         mDescriptionTextView.setText(R.string.already_authenticated_text);
-        mConnectProgressBar.setVisibility(View.GONE);
+        mDescriptionTextView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
     }
 
     private void showConnectingInProgressUI() {
         mConnectButton.setVisibility(View.GONE);
-        mTitleTextView.setVisibility(View.GONE);
         mDescriptionTextView.setVisibility(View.GONE);
         mConnectProgressBar.setVisibility(View.VISIBLE);
     }
@@ -173,7 +168,6 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
 
     private void resetUIForConnect() {
         mConnectButton.setVisibility(View.VISIBLE);
-        mTitleTextView.setVisibility(View.GONE);
         mDescriptionTextView.setVisibility(View.GONE);
         mConnectProgressBar.setVisibility(View.GONE);
     }
@@ -221,5 +215,4 @@ public class AccountFragment extends Fragment implements MicrosoftAuthentication
 
         boolean isUserAuthenticated();
     }
-
 }
