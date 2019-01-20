@@ -17,9 +17,6 @@ public class Profile {
         this.isDefault = isDefault;
     }
 
-    public Profile() {
-    }
-
     public Profile(int id, String name, String sourceFolder, String fileHandling, String audioFormat, boolean isDefault) {
         this.id = id;
         this.name = name;

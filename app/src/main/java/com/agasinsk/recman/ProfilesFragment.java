@@ -37,7 +37,7 @@ public class ProfilesFragment extends Fragment {
         return fragment;
     }
 
-    public void setProfilesRepository(ProfilesRepository mProfilesRepository) {
+    private void setProfilesRepository(ProfilesRepository mProfilesRepository) {
         if (mProfilesRepository == null) {
             this.mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
         }
@@ -60,11 +60,6 @@ public class ProfilesFragment extends Fragment {
         super.onDetach();
         mProfilesRepository.close();
         mListener = null;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override

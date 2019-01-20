@@ -52,6 +52,8 @@ public class HomeFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private View fragmentView;
+    private TextView mDescriptionTextView;
+    private TextView mTrackTextView;
     private ProgressBar mProgressBar;
     private ArrayAdapter<CharSequence> mFileHandlingAdapter;
     private ArrayAdapter<CharSequence> mAudioFormatAdapter;
@@ -59,8 +61,6 @@ public class HomeFragment extends Fragment {
     private GraphServiceController mGraphServiceController;
 
     public HomeFragment() {
-        mFilesHandler = new FilesHandler();
-        mGraphServiceController = new GraphServiceController(getContext());
     }
 
     public static HomeFragment newInstance(ProfilesRepository profilesRepository) {
@@ -74,7 +74,7 @@ public class HomeFragment extends Fragment {
         return fragment;
     }
 
-    public void setProfilesRepository(ProfilesRepository mProfilesRepository) {
+    private void setProfilesRepository(ProfilesRepository mProfilesRepository) {
         if (mProfilesRepository == null) {
             this.mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
         }
@@ -105,6 +105,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mFilesHandler = new FilesHandler();
+        mGraphServiceController = new GraphServiceController(getContext());
     }
 
     @Override
@@ -159,6 +161,9 @@ public class HomeFragment extends Fragment {
                 mListener.onSilentAuthenticationFailed();
             }
         });
+
+        mDescriptionTextView = fragmentView.findViewById(R.id.homeDescriptionTextView);
+        mTrackTextView = fragmentView.findViewById(R.id.trackDescriptionTextView);
 
         mProgressBar = fragmentView.findViewById(R.id.homeProgressBar);
         new GetDefaultProfileTask().execute(defaultProfile != null);
@@ -228,6 +233,13 @@ public class HomeFragment extends Fragment {
                         }
                     })
                     .convert();
+
+            mDescriptionTextView.setVisibility(View.VISIBLE);
+
+            mDescriptionTextView.setText("We found " + filesToConvert.size() + " audio file(s) to convert." +
+                            "\nIt may take a couple of minutes. Please wait.");
+            mTrackTextView.setVisibility(View.VISIBLE);
+            mTrackTextView.setText("File in use: " + file.getName());
             Toast.makeText(getContext(), R.string.toast_conversion_started, Toast.LENGTH_LONG).show();
         }
     }
@@ -241,6 +253,8 @@ public class HomeFragment extends Fragment {
                     Toast.makeText(getContext(), "Successfully uploaded file " + driveItem.name + " to OneDrive", Toast.LENGTH_LONG).show();
                     removeFile(driveItem.name);
                     mProgressBar.setVisibility(View.GONE);
+                    mDescriptionTextView.setVisibility(View.GONE);
+                    mTrackTextView.setVisibility(View.GONE);
                 }
 
                 @Override

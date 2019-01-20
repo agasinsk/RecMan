@@ -4,7 +4,6 @@
  */
 package com.agasinsk.recman.microsoft.graph;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.util.Log;
 
@@ -57,18 +56,5 @@ public class GraphServiceController {
         } catch (Exception ex) {
             Log.e("GraphServiceController", "Exception on upload file to OneDrive", ex);
         }
-    }
-
-    /*
-     * Opens a user dialog that shows the failure result of an exception and writes a log entry
-     * */
-    private void showException(Exception ex, String exceptionAction, String exceptionTitle, String exceptionMessage) {
-        Log.e("GraphServiceController", exceptionAction + ex.getLocalizedMessage());
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
-        alertDialogBuilder.setTitle(exceptionTitle);
-        alertDialogBuilder.setMessage(exceptionMessage);
-        alertDialogBuilder.setNeutralButton("Ok", (dialog, which) -> {
-        });
-        alertDialogBuilder.show();
     }
 }
