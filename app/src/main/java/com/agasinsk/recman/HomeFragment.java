@@ -59,16 +59,26 @@ public class HomeFragment extends Fragment {
     private GraphServiceController mGraphServiceController;
 
     public HomeFragment() {
+        mFilesHandler = new FilesHandler();
+        mGraphServiceController = new GraphServiceController(getContext());
     }
 
-    public static HomeFragment newInstance() {
-        return newInstance(null);
+    public static HomeFragment newInstance(ProfilesRepository profilesRepository) {
+        return newInstance(null, profilesRepository);
     }
 
-    public static HomeFragment newInstance(Profile defaultProfile) {
+    public static HomeFragment newInstance(Profile defaultProfile, ProfilesRepository profilesRepository) {
         HomeFragment fragment = new HomeFragment();
         fragment.setDefaultProfile(defaultProfile);
+        fragment.setProfilesRepository(profilesRepository);
         return fragment;
+    }
+
+    public void setProfilesRepository(ProfilesRepository mProfilesRepository) {
+        if (mProfilesRepository == null) {
+            this.mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
+        }
+        this.mProfilesRepository = mProfilesRepository;
     }
 
     private void setDefaultProfile(Profile defaultProfile) {
@@ -95,9 +105,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
-        mFilesHandler = new FilesHandler();
-        mGraphServiceController = new GraphServiceController(getContext());
     }
 
     @Override
@@ -141,7 +148,6 @@ public class HomeFragment extends Fragment {
         });
 
         // Setup convertFAB
-
         FloatingActionButton fab = fragmentView.findViewById(R.id.goFab);
         fab.setOnClickListener(view -> {
             if (mListener.checkIfUserIsAuthenticated()) {

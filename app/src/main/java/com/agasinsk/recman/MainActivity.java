@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity
         mBottomNavigation = findViewById(R.id.navigation);
         mBottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        loadFragment(HomeFragment.newInstance(null));
+        loadFragment(HomeFragment.newInstance(mProfilesRepository));
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
 
         checkForPermissions();
@@ -119,11 +119,11 @@ public class MainActivity extends AppCompatActivity
             = item -> {
         switch (item.getItemId()) {
             case R.id.navigation_home:
-                mHomeFragment = HomeFragment.newInstance(null);
+                mHomeFragment = HomeFragment.newInstance(mProfilesRepository);
                 loadFragment(mHomeFragment);
                 return true;
             case R.id.navigation_profiles:
-                mProfilesFragment = ProfilesFragment.newInstance();
+                mProfilesFragment = ProfilesFragment.newInstance(mProfilesRepository);
                 loadFragment(mProfilesFragment);
                 return true;
             case R.id.navigation_account:
@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity
     public void onProfileSelected(Profile profile) {
         Log.d(RECMAN_TAG, "Profile selected with id: " + profile.getId());
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
-        mHomeFragment = HomeFragment.newInstance(profile);
+        mHomeFragment = HomeFragment.newInstance(profile, mProfilesRepository);
         loadFragment(mHomeFragment);
     }
 
@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity
         Log.d(RECMAN_TAG, "Successfully authenticated user " + userName);
         isUserAuthenticated = true;
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
-        mHomeFragment = HomeFragment.newInstance();
+        mHomeFragment = HomeFragment.newInstance(mProfilesRepository);
         loadFragment(mHomeFragment);
     }
 

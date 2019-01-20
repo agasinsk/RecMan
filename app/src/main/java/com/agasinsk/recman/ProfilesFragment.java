@@ -24,14 +24,24 @@ public class ProfilesFragment extends Fragment {
     private View fragmentView;
     private ProfileListAdapter mAdapter;
     private Profile selectedProfile;
+
     private ProfilesRepository mProfilesRepository;
 
     public ProfilesFragment() {
         // Required empty public constructor
     }
 
-    public static ProfilesFragment newInstance() {
-        return new ProfilesFragment();
+    public static ProfilesFragment newInstance(ProfilesRepository mProfilesRepository) {
+        ProfilesFragment fragment = new ProfilesFragment();
+        fragment.setProfilesRepository(mProfilesRepository);
+        return fragment;
+    }
+
+    public void setProfilesRepository(ProfilesRepository mProfilesRepository) {
+        if (mProfilesRepository == null) {
+            this.mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
+        }
+        this.mProfilesRepository = mProfilesRepository;
     }
 
     @Override
@@ -55,7 +65,6 @@ public class ProfilesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
     }
 
     @Override
