@@ -20,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.agasinsk.recman.helpers.BundleConstants;
 import com.agasinsk.recman.helpers.FileUtils;
 import com.agasinsk.recman.helpers.FilesHandler;
 import com.agasinsk.recman.helpers.ProfilesRepository;
@@ -32,10 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
-import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
-import cafe.adriel.androidaudioconverter.model.AudioFormat;
 
 public class HomeFragment extends Fragment {
     private final String RECMAN_TAG = "RecMan:Home";
@@ -213,69 +210,20 @@ public class HomeFragment extends Fragment {
             Log.e(RECMAN_TAG, "An error occurred while selecting files!", e);
         }
 
-        for (File file : filesToConvert) {
-            mProgressBar.setVisibility(View.VISIBLE);
-            AndroidAudioConverter.with(getContext())
-                    .setFile(file)
-                    .setFormat(AudioFormat.valueOf(audioFormat))
-                    .setCallback(new IConvertCallback() {
-                        @Override
-                        public void onSuccess(File convertedFile) {
-                            Log.i(RECMAN_TAG, "File " + convertedFile.getName() + " successfully converted!");
-                            uploadConvertedFileToOneDrive(convertedFile);
-                        }
+        mProgressBar.setVisibility(View.VISIBLE);
 
-                        @Override
-                        public void onFailure(Exception error) {
-                            Log.e(RECMAN_TAG, "An error occurred during file conversion!", error);
-                            Toast.makeText(getContext(), R.string.toast_conversion_error, Toast.LENGTH_LONG).show();
-                            mProgressBar.setVisibility(View.GONE);
-                        }
-                    })
-                    .convert();
-
-            mDescriptionTextView.setVisibility(View.VISIBLE);
-
-            mDescriptionTextView.setText("We found " + filesToConvert.size() + " audio file(s) to convert." +
-                            "\nIt may take a couple of minutes. Please wait.");
-            mTrackTextView.setVisibility(View.VISIBLE);
-            mTrackTextView.setText("File in use: " + file.getName());
-            Toast.makeText(getContext(), R.string.toast_conversion_started, Toast.LENGTH_LONG).show();
+        for(File fileToConvert : filesToConvert) {
+            mListener.setUpConversionIntent(fileToConvert.getPath(), audioFormat);
         }
+
+        mDescriptionTextView.setVisibility(View.VISIBLE);
+
+        mDescriptionTextView.setText("We found " + filesToConvert.size() + " audio file(s) to convert." +
+                "\nIt may take a couple of minutes. Please wait.");
+        mTrackTextView.setVisibility(View.VISIBLE);
+        Toast.makeText(getContext(), R.string.toast_conversion_started, Toast.LENGTH_LONG).show();
     }
 
-    private void uploadConvertedFileToOneDrive(File convertedFile) {
-        try {
-            mGraphServiceController.uploadFileToOneDrive(convertedFile, new ICallback<DriveItem>() {
-                @Override
-                public void success(DriveItem driveItem) {
-                    Log.i(RECMAN_TAG, "Successfully uploaded file " + driveItem.name + " to OneDrive");
-                    Toast.makeText(getContext(), "Successfully uploaded file " + driveItem.name + " to OneDrive", Toast.LENGTH_LONG).show();
-                    removeFile(driveItem.name);
-                    mProgressBar.setVisibility(View.GONE);
-                    mDescriptionTextView.setVisibility(View.GONE);
-                    mTrackTextView.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void failure(ClientException ex) {
-                    Log.e(RECMAN_TAG, "Exception on file upload to OneDrive ", ex);
-                }
-            });
-        } catch (Exception ex) {
-            Log.e(RECMAN_TAG, "Exception on file upload " + ex.getLocalizedMessage());
-        }
-    }
-
-    private void removeFile(String name) {
-
-        File fileToDelete = new File(selectedFolderPath, name);
-        if (fileToDelete.isFile() && fileToDelete.canRead()) {
-            if (!fileToDelete.delete()) {
-                Log.e(RECMAN_TAG, "An error occurred while deleting file " + name);
-            }
-        }
-    }
 
     public interface OnFragmentInteractionListener {
         void askForProfileName();
@@ -283,6 +231,8 @@ public class HomeFragment extends Fragment {
         void onSilentAuthenticationFailed();
 
         boolean checkIfUserIsAuthenticated();
+
+        void setUpConversionIntent(String path, String audioFormat);
     }
 
     private class GetDefaultProfileTask extends AsyncTask<Boolean, Void, Profile> {

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.agasinsk.recman.helpers.BundleConstants;
 import com.agasinsk.recman.helpers.ProfilesRepository;
 import com.agasinsk.recman.microsoft.graph.AuthenticationManager;
 import com.agasinsk.recman.microsoft.graph.MicrosoftAuthenticationCallback;
@@ -26,12 +28,18 @@ import com.microsoft.identity.client.User;
 
 import java.util.List;
 
+import static com.agasinsk.recman.ConversionJobService.RESULT_CONVERSION_FAILED;
+import static com.agasinsk.recman.ConversionJobService.RESULT_CONVERSION_OK;
+import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_FAILED;
+import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_OK;
+
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener,
         ProfilesFragment.OnFragmentInteractionListener,
         ProfileNameDialogFragment.ProfileNameDialogListener,
         AccountFragment.OnFragmentInteractionListener,
-        MicrosoftAuthenticationCallback {
+        MicrosoftAuthenticationCallback,
+        ServiceResultReceiver.Receiver {
 
     private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 200;
     private final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 201;
@@ -46,6 +54,8 @@ public class MainActivity extends AppCompatActivity
     private AccountFragment mAccountFragment;
     private BottomNavigationView mBottomNavigation;
 
+    private ServiceResultReceiver mServiceResultReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +68,9 @@ public class MainActivity extends AppCompatActivity
 
         loadFragment(HomeFragment.newInstance(mProfilesRepository));
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
+
+        mServiceResultReceiver = new ServiceResultReceiver(new Handler());
+        mServiceResultReceiver.setReceiver(this);
 
         checkForPermissions();
         tryToConnectToMicrosoftGraphSilently();
@@ -244,6 +257,15 @@ public class MainActivity extends AppCompatActivity
         return isUserAuthenticated;
     }
 
+    @Override
+    public void setUpConversionIntent(String filePath, String audioFormat) {
+        Intent conversionIntent = new Intent(this, ConversionJobService.class);
+        conversionIntent.putExtra(BundleConstants.AUDIO_FORMAT, audioFormat);
+        conversionIntent.putExtra(BundleConstants.RECEIVER, mServiceResultReceiver);
+        conversionIntent.putExtra(BundleConstants.FILE_PATH, filePath);
+        ConversionJobService.enqueueWork(this, conversionIntent);
+    }
+
     public void onSilentAuthenticationFailed() {
         Log.d(RECMAN_TAG, "Silent authentication failed. Opening Account Fragment.");
         mBottomNavigation.setSelectedItemId(R.id.navigation_account);
@@ -305,6 +327,35 @@ public class MainActivity extends AppCompatActivity
                 }
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        switch (resultCode) {
+            case RESULT_CONVERSION_OK:
+                String convertedFilePath = resultData.getString(BundleConstants.CONVERTED_FILE_PATH);
+                String convertedFileName = resultData.getString(BundleConstants.CONVERTED_FILE_NAME);
+                Toast.makeText(this, "Converted track: " + convertedFileName, Toast.LENGTH_SHORT).show();
+
+                Intent conversionIntent = new Intent(this, UploadJobService.class);
+                conversionIntent.putExtra(BundleConstants.CONVERTED_FILE_PATH, convertedFilePath);
+                conversionIntent.putExtra(BundleConstants.CONVERTED_FILE_NAME, convertedFileName);
+                conversionIntent.putExtra(BundleConstants.RECEIVER, mServiceResultReceiver);
+                UploadJobService.enqueueWork(this, conversionIntent);
+                break;
+            case RESULT_CONVERSION_FAILED:
+                String fileWithError = resultData.getString(BundleConstants.CONVERTED_FILE_NAME);
+                Toast.makeText(this, "An error occured while converting file " + fileWithError, Toast.LENGTH_LONG).show();
+                break;
+            case RESULT_UPLOAD_OK:
+                String uploadedFileName = resultData.getString(BundleConstants.UPLOADED_FILE_NAME);
+                Toast.makeText(this, "Successfully uploaded file: " + uploadedFileName, Toast.LENGTH_SHORT).show();
+                break;
+            case RESULT_UPLOAD_FAILED:
+                String uploadfileWithError = resultData.getString(BundleConstants.UPLOADED_FILE_NAME);
+                Toast.makeText(this, "An error occured while converting file " + uploadfileWithError, Toast.LENGTH_LONG).show();
+                break;
         }
     }
 }
