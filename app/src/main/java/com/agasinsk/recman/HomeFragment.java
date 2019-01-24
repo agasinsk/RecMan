@@ -273,8 +273,9 @@ public class HomeFragment extends Fragment {
         String fileCountString = getString(R.string.files_count, fileId, totalFileCount);
         mFileCountTextView.setText(fileCountString);
 
-        FileDto fileDto = mFileListAdapter.getItem(fileId);
+        mProgressBar.setIndeterminate(false);
         int currentProgress = mProgressBar.getProgress();
+        FileDto fileDto = mFileListAdapter.getItem(fileId);
 
         switch (resultCode) {
             case RESULT_CONVERSION_OK:

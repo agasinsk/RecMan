@@ -50,12 +50,20 @@ public class FileDtoListAdapter extends ArrayAdapter<FileDto> {
         name.setText(fileDto.name);
 
         ProgressBar fileProgress = listItem.findViewById(R.id.fileProgressBar);
+        if (fileDto.progress == 0) {
+            fileProgress.setIndeterminate(true);
+            return listItem;
+        }
+        else{
+            fileProgress.setIndeterminate(false);
+        }
+
         if (fileDto.hasError) {
-            fileProgress.setProgress(100);
+            fileProgress.setProgress(100, true);
             fileProgress.getProgressDrawable().setColorFilter(
                     Color.RED, android.graphics.PorterDuff.Mode.SRC_IN);
         } else {
-            fileProgress.setProgress(fileDto.progress);
+            fileProgress.setProgress(fileDto.progress, true);
         }
         return listItem;
     }
