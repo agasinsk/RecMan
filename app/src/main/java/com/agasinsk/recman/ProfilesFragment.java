@@ -159,7 +159,7 @@ public class ProfilesFragment extends Fragment {
         }
 
         protected void onPostExecute(List<Profile> result) {
-            fragmentView.findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
+            fragmentView.findViewById(R.id.progressBar).setVisibility(View.GONE);
 
             if (result != null) {
                 mAdapter.clear();

@@ -337,23 +337,19 @@ public class MainActivity extends AppCompatActivity
         switch (resultCode) {
             case RESULT_CONVERSION_OK:
                 String filePath = resultData.getString(BundleConstants.FILE_PATH);
-                String fileName = resultData.getString(BundleConstants.FILE_NAME);
                 int fileId = resultData.getInt(BundleConstants.FILE_ID);
                 int fileCount = resultData.getInt(BundleConstants.FILE_TOTAL_COUNT);
-
                 enqueueFileUploadIntent(filePath, fileId, fileCount);
-
-                Toast.makeText(this, "Successfully converted track: \n" + fileName, Toast.LENGTH_SHORT).show();
-                mHomeFragment.showProgressUI(resultCode, fileName, fileId, fileCount);
+                mHomeFragment.showProgressUI(resultCode, fileId, fileCount);
                 break;
             case RESULT_CONVERSION_FAILED:
-                showProgressUI(resultCode, resultData, "An error occurred while converting file: ", Toast.LENGTH_LONG);
+                showProgressUI(resultCode, resultData);
                 break;
             case RESULT_UPLOAD_OK:
-                showProgressUI(resultCode, resultData, "Successfully uploaded file: ", Toast.LENGTH_SHORT);
+                showProgressUI(resultCode, resultData);
                 break;
             case RESULT_UPLOAD_FAILED:
-                showProgressUI(resultCode, resultData, "An error occurred while uploading file: ", Toast.LENGTH_LONG);
+                showProgressUI(resultCode, resultData);
                 break;
         }
     }
@@ -367,11 +363,9 @@ public class MainActivity extends AppCompatActivity
         UploadJobService.enqueueWork(this, fileUploadIntent);
     }
 
-    private void showProgressUI(int resultCode, Bundle resultData, String toastString, int lengthLong) {
-        String fileName = resultData.getString(BundleConstants.FILE_NAME);
+    private void showProgressUI(int resultCode, Bundle resultData) {
         int fileId = resultData.getInt(BundleConstants.FILE_ID);
         int fileCount = resultData.getInt(BundleConstants.FILE_TOTAL_COUNT);
-        Toast.makeText(this, toastString + fileName, lengthLong).show();
-        mHomeFragment.showProgressUI(resultCode, fileName, fileId, fileCount);
+        mHomeFragment.showProgressUI(resultCode, fileId, fileCount);
     }
 }

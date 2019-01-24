@@ -15,16 +15,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.agasinsk.recman.helpers.BundleConstants;
 import com.agasinsk.recman.helpers.FileUtils;
 import com.agasinsk.recman.helpers.FilesHandler;
 import com.agasinsk.recman.helpers.ProfilesRepository;
-import com.agasinsk.recman.microsoft.graph.GraphServiceController;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +38,7 @@ import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_FAILED;
 import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_OK;
 
 public class HomeFragment extends Fragment {
-    private final String RECMAN_TAG = "RecMan:Home";
+    private final String RECMAN_TAG = "RecMan:HomeFragment";
     private final int SOURCE_FOLDER_REQUEST_CODE = 100;
 
     private String selectedFolderPath = "";
@@ -51,13 +52,17 @@ public class HomeFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private View fragmentView;
-    private TextView mDescriptionTextView;
-    private TextView mTrackTextView;
     private ProgressBar mProgressBar;
+    private View mTotalProgressTextView;
+    private TextView mFileCountTextView;
+    private FloatingActionButton mFab;
+    private ListView mFileListView;
+
     private ArrayAdapter<CharSequence> mFileHandlingAdapter;
     private ArrayAdapter<CharSequence> mAudioFormatAdapter;
 
-    private GraphServiceController mGraphServiceController;
+    private FileDtoListAdapter mFileListAdapter;
+    private int mProgressFraction;
 
     public HomeFragment() {
     }
@@ -105,7 +110,6 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFilesHandler = new FilesHandler();
-        mGraphServiceController = new GraphServiceController(getContext());
     }
 
     @Override
@@ -148,9 +152,13 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        mProgressBar = fragmentView.findViewById(R.id.homeProgressBar);
+        mTotalProgressTextView = fragmentView.findViewById(R.id.totalProgressTextView);
+        mFileCountTextView = fragmentView.findViewById(R.id.fileCountTextView);
+
         // Setup convertFAB
-        FloatingActionButton fab = fragmentView.findViewById(R.id.goFab);
-        fab.setOnClickListener(view -> {
+        mFab = fragmentView.findViewById(R.id.goFab);
+        mFab.setOnClickListener(view -> {
             if (mListener.checkIfUserIsAuthenticated()) {
                 String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
                 String audioFormat = audioFormatSpinner.getSelectedItem().toString();
@@ -161,10 +169,10 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        mDescriptionTextView = fragmentView.findViewById(R.id.homeDescriptionTextView);
-        mTrackTextView = fragmentView.findViewById(R.id.trackDescriptionTextView);
+        mFileListView = fragmentView.findViewById(R.id.filesListView);
+        mFileListAdapter = new FileDtoListAdapter(getContext(), R.layout.file_list_item, new ArrayList<>());
+        mFileListView.setAdapter(mFileListAdapter);
 
-        mProgressBar = fragmentView.findViewById(R.id.homeProgressBar);
         new GetDefaultProfileTask().execute(defaultProfile != null);
 
         return fragmentView;
@@ -182,7 +190,7 @@ public class HomeFragment extends Fragment {
         if (requestCode == SOURCE_FOLDER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 Uri selectedFolderUri = resultData.getData();
-                Log.i(RECMAN_TAG, "Uri: " + selectedFolderUri.toString());
+                Log.d(RECMAN_TAG, "Uri: " + selectedFolderUri.toString());
                 selectedFolderPath = FileUtils.getFullPathFromTreeUri(selectedFolderUri, getActivity());
 
                 selectedFolderTextView.setText(selectedFolderPath);
@@ -201,10 +209,12 @@ public class HomeFragment extends Fragment {
         File directory = new File(folderPath);
         List<File> filesToConvert = new ArrayList<>();
 
+        int fileToConvertCount = 0;
         try {
             File[] files = directory.listFiles(File::isFile);
             filesToConvert = mFilesHandler.getFilesWithHandling(files, fileHandling, audioFormat);
-            if (filesToConvert.size() == 0) {
+            fileToConvertCount = filesToConvert.size();
+            if (fileToConvertCount == 0) {
                 Log.e(RECMAN_TAG, "No files were found to be converted!");
                 Toast.makeText(getContext(), "No files were found to be converted!", Toast.LENGTH_SHORT).show();
             }
@@ -212,31 +222,60 @@ public class HomeFragment extends Fragment {
             Log.e(RECMAN_TAG, "An error occurred while selecting files!", e);
         }
 
-        mProgressBar.setVisibility(View.VISIBLE);
-
-        for (int i = 0; i < filesToConvert.size(); i++) {
+        ArrayList<FileDto> fileDtos = new ArrayList<>(fileToConvertCount);
+        for (int i = 0; i < fileToConvertCount; i++) {
             File fileToConvert = filesToConvert.get(i);
-            mListener.setUpConversionIntent(fileToConvert.getPath(), audioFormat, i + 1, filesToConvert.size());
+            int fileId = i + 1;
+            fileDtos.add(new FileDto(fileId, fileToConvert.getName()));
+            mListener.setUpConversionIntent(fileToConvert.getPath(), audioFormat, fileId, fileToConvertCount);
         }
 
-        mDescriptionTextView.setVisibility(View.VISIBLE);
-        mDescriptionTextView.setText("We found " + filesToConvert.size() + " audio file(s) to convert." +
-                "\nIt may take a couple of minutes. Please wait.");
-        mTrackTextView.setVisibility(View.VISIBLE);
+        mProgressFraction = (int)Math.ceil(100 / (2 * (double)fileToConvertCount));
+
+        mFab.setEnabled(false);
+        mTotalProgressTextView.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.VISIBLE);
+        mFileListView.setVisibility(View.VISIBLE);
+        mFileCountTextView.setVisibility(View.VISIBLE);
+        String fileCountString = getString(R.string.files_count, 0, fileToConvertCount);
+        mFileCountTextView.setText(fileCountString);
+
+        String descriptionText = getString(R.string.conversion_description, fileToConvertCount);
+        Toast.makeText(getContext(), descriptionText, Toast.LENGTH_LONG).show();
+
+        mFileListAdapter.clear();
+        mFileListAdapter.addAll(fileDtos);
+        mFileListAdapter.notifyDataSetChanged();
     }
 
-    public void showProgressUI(int resultCode, String fileName, int fileId, int totalFileCount) {
+    public void showProgressUI(int resultCode, int fileId, int totalFileCount) {
+        FileDto fileDto = mFileListAdapter.getItem(fileId);
+        int currentProgress = mProgressBar.getProgress();
 
+        String fileCountString = getString(R.string.files_count, fileId, totalFileCount);
+        mFileCountTextView.setText(fileCountString);
         switch (resultCode) {
             case RESULT_CONVERSION_OK:
+                fileDto.progress = 50;
+                mProgressBar.setProgress(currentProgress + mProgressFraction);
                 break;
             case RESULT_CONVERSION_FAILED:
+                fileDto.hasError = true;
                 break;
             case RESULT_UPLOAD_OK:
+                fileDto.progress = 100;
+                mProgressBar.setProgress(currentProgress + mProgressFraction);
+                if (fileId == totalFileCount) {
+                    String toastText = getString(R.string.finish_description, totalFileCount);
+                    Toast.makeText(getContext(), toastText, Toast.LENGTH_LONG).show();
+                    mFab.setEnabled(true);
+                }
                 break;
             case RESULT_UPLOAD_FAILED:
+                fileDto.hasError = true;
                 break;
         }
+        mFileListAdapter.notifyDataSetChanged();
     }
 
     public interface OnFragmentInteractionListener {

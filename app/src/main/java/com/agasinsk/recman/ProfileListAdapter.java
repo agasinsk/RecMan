@@ -40,7 +40,6 @@ class ProfileListAdapter extends ArrayAdapter<Profile> {
 
         final Profile currentProfile = profiles.get(position);
 
-        //Inflate the view
         if (listItem == null) {
             listItem = LayoutInflater.from(mContext).inflate(R.layout.profile_list_item, parent, false);
         }
