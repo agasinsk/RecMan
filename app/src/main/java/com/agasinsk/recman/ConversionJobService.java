@@ -31,7 +31,6 @@ public class ConversionJobService extends JobIntentService {
      */
     private static final int AUDIO_CONVERSION_JOB_ID = 1000;
 
-
     /**
      * Convenience method for enqueuing work in to this service.
      */
@@ -44,6 +43,8 @@ public class ConversionJobService extends JobIntentService {
         Log.i(TAG, "Executing work: " + intent);
         String audioFormat = intent.getStringExtra(BundleConstants.AUDIO_FORMAT);
         String filePath = intent.getStringExtra(BundleConstants.FILE_PATH);
+        int fileId = intent.getIntExtra(BundleConstants.FILE_ID, 0);
+        int fileCount = intent.getIntExtra(BundleConstants.FILE_TOTAL_COUNT, 0);
         mResultReceiver = intent.getParcelableExtra(BundleConstants.RECEIVER);
 
         File fileToConvert = new File(filePath);
@@ -55,20 +56,24 @@ public class ConversionJobService extends JobIntentService {
                     @Override
                     public void onSuccess(File convertedFile) {
                         Log.i(TAG, "File " + convertedFile.getName() + " successfully converted!");
-                        Bundle bundle = new Bundle();
-                        bundle.putString(BundleConstants.CONVERTED_FILE_PATH, convertedFile.getPath());
-                        bundle.putString(BundleConstants.CONVERTED_FILE_NAME, convertedFile.getName());
-                        mResultReceiver.send(RESULT_CONVERSION_OK, bundle);
+                        sendResultWithBundle(RESULT_CONVERSION_OK, convertedFile.getPath(), convertedFile.getName(), fileId, fileCount);
                     }
 
                     @Override
                     public void onFailure(Exception error) {
                         Log.e(TAG, "An error occurred during file conversion!", error);
-                        Bundle bundle = new Bundle();
-                        bundle.putString(BundleConstants.ERROR_FILE_PATH, filePath);
-                        mResultReceiver.send(RESULT_CONVERSION_FAILED, bundle);
+                        sendResultWithBundle(RESULT_CONVERSION_FAILED, filePath, fileToConvert.getName(), fileId, fileCount);
                     }
                 })
                 .convert();
+    }
+
+    private void sendResultWithBundle(int resultCode, String filePath, String fileName, int fileId, int fileCount) {
+        Bundle bundle = new Bundle();
+        bundle.putString(BundleConstants.FILE_PATH, filePath);
+        bundle.putString(BundleConstants.FILE_NAME, fileName);
+        bundle.putInt(BundleConstants.FILE_ID, fileId);
+        bundle.putInt(BundleConstants.FILE_TOTAL_COUNT, fileCount);
+        mResultReceiver.send(resultCode, bundle);
     }
 }

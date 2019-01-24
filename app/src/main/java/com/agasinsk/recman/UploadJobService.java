@@ -51,8 +51,9 @@ public class UploadJobService extends JobIntentService {
     @Override
     protected void onHandleWork(Intent intent) {
         Log.i(TAG, "Executing work: " + intent);
-        String fileToUploadPath = intent.getStringExtra(BundleConstants.CONVERTED_FILE_PATH);
-        String fileToUploadName = intent.getStringExtra(BundleConstants.CONVERTED_FILE_NAME);
+        String fileToUploadPath = intent.getStringExtra(BundleConstants.FILE_PATH);
+        int fileId = intent.getIntExtra(BundleConstants.FILE_ID, 0);
+        int fileCount = intent.getIntExtra(BundleConstants.FILE_TOTAL_COUNT, 0);
         mResultReceiver = intent.getParcelableExtra(BundleConstants.RECEIVER);
 
         File fileToUpload = new File(fileToUploadPath);
@@ -61,24 +62,28 @@ public class UploadJobService extends JobIntentService {
                     .uploadFileToOneDrive(fileToUpload, new ICallback<DriveItem>() {
                         @Override
                         public void success(DriveItem driveItem) {
-                            Log.i(TAG, "Successfully uploaded file " + driveItem.name + " to OneDrive");
+                            Log.d(TAG, "Successfully uploaded file " + driveItem.name + " to OneDrive");
                             removeFile(fileToUploadPath);
-                            Bundle bundle = new Bundle();
-                            bundle.putString(BundleConstants.UPLOADED_FILE_NAME, driveItem.name);
-                            mResultReceiver.send(RESULT_UPLOAD_OK, bundle);
+                            sendResultWithBundle(RESULT_UPLOAD_OK, driveItem.name, fileId, fileCount);
                         }
 
                         @Override
                         public void failure(ClientException ex) {
                             Log.e(TAG, "Exception on file upload to OneDrive ", ex);
-                            Bundle bundle = new Bundle();
-                            bundle.putString(BundleConstants.UPLOADED_FILE_NAME, fileToUploadName);
-                            mResultReceiver.send(RESULT_UPLOAD_FAILED, bundle);
+                            sendResultWithBundle(RESULT_UPLOAD_FAILED, fileToUpload.getName(), fileId, fileCount);
                         }
                     });
         } catch (Exception ex) {
-            Log.e(TAG, "Exception on file upload " + ex.getLocalizedMessage());
+            Log.e(TAG, "Exception on file upload " + ex.getLocalizedMessage(), ex);
         }
+    }
+
+    private void sendResultWithBundle(int resultCode, String fileName, int fileId, int fileCount) {
+        Bundle bundle = new Bundle();
+        bundle.putString(BundleConstants.FILE_NAME, fileName);
+        bundle.putInt(BundleConstants.FILE_ID, fileId);
+        bundle.putInt(BundleConstants.FILE_TOTAL_COUNT, fileCount);
+        mResultReceiver.send(resultCode, bundle);
     }
 
     private void removeFile(String filePath) {

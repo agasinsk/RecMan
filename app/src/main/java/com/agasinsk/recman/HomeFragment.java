@@ -25,14 +25,16 @@ import com.agasinsk.recman.helpers.FileUtils;
 import com.agasinsk.recman.helpers.FilesHandler;
 import com.agasinsk.recman.helpers.ProfilesRepository;
 import com.agasinsk.recman.microsoft.graph.GraphServiceController;
-import com.microsoft.graph.concurrency.ICallback;
-import com.microsoft.graph.core.ClientException;
-import com.microsoft.graph.extensions.DriveItem;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.agasinsk.recman.ConversionJobService.RESULT_CONVERSION_FAILED;
+import static com.agasinsk.recman.ConversionJobService.RESULT_CONVERSION_OK;
+import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_FAILED;
+import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_OK;
 
 public class HomeFragment extends Fragment {
     private final String RECMAN_TAG = "RecMan:Home";
@@ -212,18 +214,30 @@ public class HomeFragment extends Fragment {
 
         mProgressBar.setVisibility(View.VISIBLE);
 
-        for(File fileToConvert : filesToConvert) {
-            mListener.setUpConversionIntent(fileToConvert.getPath(), audioFormat);
+        for (int i = 0; i < filesToConvert.size(); i++) {
+            File fileToConvert = filesToConvert.get(i);
+            mListener.setUpConversionIntent(fileToConvert.getPath(), audioFormat, i + 1, filesToConvert.size());
         }
 
         mDescriptionTextView.setVisibility(View.VISIBLE);
-
         mDescriptionTextView.setText("We found " + filesToConvert.size() + " audio file(s) to convert." +
                 "\nIt may take a couple of minutes. Please wait.");
         mTrackTextView.setVisibility(View.VISIBLE);
-        Toast.makeText(getContext(), R.string.toast_conversion_started, Toast.LENGTH_LONG).show();
     }
 
+    public void showProgressUI(int resultCode, String fileName, int fileId, int totalFileCount) {
+
+        switch (resultCode) {
+            case RESULT_CONVERSION_OK:
+                break;
+            case RESULT_CONVERSION_FAILED:
+                break;
+            case RESULT_UPLOAD_OK:
+                break;
+            case RESULT_UPLOAD_FAILED:
+                break;
+        }
+    }
 
     public interface OnFragmentInteractionListener {
         void askForProfileName();
@@ -232,7 +246,7 @@ public class HomeFragment extends Fragment {
 
         boolean checkIfUserIsAuthenticated();
 
-        void setUpConversionIntent(String path, String audioFormat);
+        void setUpConversionIntent(String path, String audioFormat, int fileId, int totalFileCount);
     }
 
     private class GetDefaultProfileTask extends AsyncTask<Boolean, Void, Profile> {

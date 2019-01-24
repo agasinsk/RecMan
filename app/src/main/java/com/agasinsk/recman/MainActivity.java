@@ -258,11 +258,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void setUpConversionIntent(String filePath, String audioFormat) {
+    public void setUpConversionIntent(String filePath, String audioFormat, int fileId, int totalFileCount) {
         Intent conversionIntent = new Intent(this, ConversionJobService.class);
         conversionIntent.putExtra(BundleConstants.AUDIO_FORMAT, audioFormat);
         conversionIntent.putExtra(BundleConstants.RECEIVER, mServiceResultReceiver);
         conversionIntent.putExtra(BundleConstants.FILE_PATH, filePath);
+        conversionIntent.putExtra(BundleConstants.FILE_ID, fileId);
+        conversionIntent.putExtra(BundleConstants.FILE_TOTAL_COUNT, totalFileCount);
         ConversionJobService.enqueueWork(this, conversionIntent);
     }
 
@@ -334,28 +336,42 @@ public class MainActivity extends AppCompatActivity
     public void onReceiveResult(int resultCode, Bundle resultData) {
         switch (resultCode) {
             case RESULT_CONVERSION_OK:
-                String convertedFilePath = resultData.getString(BundleConstants.CONVERTED_FILE_PATH);
-                String convertedFileName = resultData.getString(BundleConstants.CONVERTED_FILE_NAME);
-                Toast.makeText(this, "Converted track: " + convertedFileName, Toast.LENGTH_SHORT).show();
+                String filePath = resultData.getString(BundleConstants.FILE_PATH);
+                String fileName = resultData.getString(BundleConstants.FILE_NAME);
+                int fileId = resultData.getInt(BundleConstants.FILE_ID);
+                int fileCount = resultData.getInt(BundleConstants.FILE_TOTAL_COUNT);
 
-                Intent conversionIntent = new Intent(this, UploadJobService.class);
-                conversionIntent.putExtra(BundleConstants.CONVERTED_FILE_PATH, convertedFilePath);
-                conversionIntent.putExtra(BundleConstants.CONVERTED_FILE_NAME, convertedFileName);
-                conversionIntent.putExtra(BundleConstants.RECEIVER, mServiceResultReceiver);
-                UploadJobService.enqueueWork(this, conversionIntent);
+                enqueueFileUploadIntent(filePath, fileId, fileCount);
+
+                Toast.makeText(this, "Successfully converted track: \n" + fileName, Toast.LENGTH_SHORT).show();
+                mHomeFragment.showProgressUI(resultCode, fileName, fileId, fileCount);
                 break;
             case RESULT_CONVERSION_FAILED:
-                String fileWithError = resultData.getString(BundleConstants.CONVERTED_FILE_NAME);
-                Toast.makeText(this, "An error occured while converting file " + fileWithError, Toast.LENGTH_LONG).show();
+                showProgressUI(resultCode, resultData, "An error occurred while converting file: ", Toast.LENGTH_LONG);
                 break;
             case RESULT_UPLOAD_OK:
-                String uploadedFileName = resultData.getString(BundleConstants.UPLOADED_FILE_NAME);
-                Toast.makeText(this, "Successfully uploaded file: " + uploadedFileName, Toast.LENGTH_SHORT).show();
+                showProgressUI(resultCode, resultData, "Successfully uploaded file: ", Toast.LENGTH_SHORT);
                 break;
             case RESULT_UPLOAD_FAILED:
-                String uploadfileWithError = resultData.getString(BundleConstants.UPLOADED_FILE_NAME);
-                Toast.makeText(this, "An error occured while converting file " + uploadfileWithError, Toast.LENGTH_LONG).show();
+                showProgressUI(resultCode, resultData, "An error occurred while uploading file: ", Toast.LENGTH_LONG);
                 break;
         }
+    }
+
+    private void enqueueFileUploadIntent(String filePath, int fileId, int fileCount) {
+        Intent fileUploadIntent = new Intent(this, UploadJobService.class);
+        fileUploadIntent.putExtra(BundleConstants.FILE_PATH, filePath);
+        fileUploadIntent.putExtra(BundleConstants.RECEIVER, mServiceResultReceiver);
+        fileUploadIntent.putExtra(BundleConstants.FILE_ID, fileId);
+        fileUploadIntent.putExtra(BundleConstants.FILE_TOTAL_COUNT, fileCount);
+        UploadJobService.enqueueWork(this, fileUploadIntent);
+    }
+
+    private void showProgressUI(int resultCode, Bundle resultData, String toastString, int lengthLong) {
+        String fileName = resultData.getString(BundleConstants.FILE_NAME);
+        int fileId = resultData.getInt(BundleConstants.FILE_ID);
+        int fileCount = resultData.getInt(BundleConstants.FILE_TOTAL_COUNT);
+        Toast.makeText(this, toastString + fileName, lengthLong).show();
+        mHomeFragment.showProgressUI(resultCode, fileName, fileId, fileCount);
     }
 }
