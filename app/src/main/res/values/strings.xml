@@ -39,7 +39,7 @@
     <string name="toast_database_error">An error occurred during database operation. Please try again.</string>
     <string name="toast_connect_error">Error connecting to Microsoft Graph.</string>
     <string name="toast_conversion_error">An error occurred while converting audio file(s). Please try again.</string>
-    <string name="files_count">%1$d/%2$d files</string>
+    <string name="files_count">Total progress: %1$d/%2$d files</string>
     <string name="toast_conversion_started">We are converting your audio files. It may take a couple of minutes.</string>
     <string name="conversion_description">We found %1$d audio file(s) to convert. \nIt may take a couple of minutes.</string>
     <string name="finish_description">We have converted and uploaded %1$d audio file(s).</string>
@@ -49,6 +49,7 @@
     <string name="toast_upload_file_error">An error occurred while uploading file %1$s. \nPlease try again.</string>
     <string name="toast_sign_out">You have been signed out.</string>
     <string name="no_profiles_yet">You don\'t have any profiles yet!</string>
+    <string name="clear">Clear</string>
 
     <string name="connect_button_text">Connect to Microsoft Graph</string>
     <string name="sign_out_menu_item_text">Sign out</string>

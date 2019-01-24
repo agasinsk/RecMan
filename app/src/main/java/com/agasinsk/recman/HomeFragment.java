@@ -25,8 +25,6 @@ import com.agasinsk.recman.helpers.FileUtils;
 import com.agasinsk.recman.helpers.FilesHandler;
 import com.agasinsk.recman.helpers.ProfilesRepository;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,8 +39,8 @@ public class HomeFragment extends Fragment {
     private final String RECMAN_TAG = "RecMan:HomeFragment";
     private final int SOURCE_FOLDER_REQUEST_CODE = 100;
 
-    private String selectedFolderPath = "";
-    private TextView selectedFolderTextView;
+    private String mSelectedFolderPath = "";
+    private TextView mSelectedFolderTextView;
 
     private Profile defaultProfile;
     private Profile mProfileToSave;
@@ -53,7 +51,6 @@ public class HomeFragment extends Fragment {
 
     private View fragmentView;
     private ProgressBar mProgressBar;
-    private View mTotalProgressTextView;
     private TextView mFileCountTextView;
     private FloatingActionButton mFab;
     private ListView mFileListView;
@@ -63,6 +60,7 @@ public class HomeFragment extends Fragment {
 
     private FileDtoListAdapter mFileListAdapter;
     private int mProgressFraction;
+    private Button mClearButton;
 
     public HomeFragment() {
     }
@@ -119,7 +117,7 @@ public class HomeFragment extends Fragment {
         fragmentView = inflater.inflate(R.layout.fragment_home, container, false);
 
         // Setup source folder selection
-        selectedFolderTextView = fragmentView.findViewById(R.id.selectedFolder);
+        mSelectedFolderTextView = fragmentView.findViewById(R.id.selectedFolder);
         final Button selectFolderButton = fragmentView.findViewById(R.id.folderButton);
         selectFolderButton.setOnClickListener(v -> performFolderSearch());
 
@@ -141,34 +139,40 @@ public class HomeFragment extends Fragment {
         // Setup SAVE_PROFILE button
         Button saveProfileButton = fragmentView.findViewById(R.id.saveProfileButton);
         saveProfileButton.setOnClickListener(v -> {
-            if (selectedFolderPath.equals("")) {
+            if (mSelectedFolderPath.equals("")) {
                 Toast.makeText(getContext(), "Select source folder first!", Toast.LENGTH_SHORT).show();
             } else {
                 String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
                 String audioFormat = audioFormatSpinner.getSelectedItem().toString();
 
-                mProfileToSave = new Profile(selectedFolderPath, fileHandling, audioFormat);
+                mProfileToSave = new Profile(mSelectedFolderPath, fileHandling, audioFormat);
                 mListener.askForProfileName();
             }
         });
 
-        mProgressBar = fragmentView.findViewById(R.id.homeProgressBar);
-        mTotalProgressTextView = fragmentView.findViewById(R.id.totalProgressTextView);
-        mFileCountTextView = fragmentView.findViewById(R.id.fileCountTextView);
+        // Setup CLEAR button
+        mClearButton = fragmentView.findViewById(R.id.clearButton);
+        mClearButton.setOnClickListener(v -> {
+            resetUI();
+        });
 
-        // Setup convertFAB
+        // Setup FAB
         mFab = fragmentView.findViewById(R.id.goFab);
         mFab.setOnClickListener(view -> {
             if (mListener.checkIfUserIsAuthenticated()) {
                 String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
                 String audioFormat = audioFormatSpinner.getSelectedItem().toString();
-                convertAudioFiles(selectedFolderPath, fileHandling, audioFormat);
+                convertAudioFiles(mSelectedFolderPath, fileHandling, audioFormat);
             } else {
                 Toast.makeText(getContext(), R.string.toast_user_not_found_error, Toast.LENGTH_SHORT).show();
                 mListener.onSilentAuthenticationFailed();
             }
         });
 
+        mProgressBar = fragmentView.findViewById(R.id.homeProgressBar);
+        mFileCountTextView = fragmentView.findViewById(R.id.fileCountTextView);
+
+        // Setup file list view
         mFileListView = fragmentView.findViewById(R.id.filesListView);
         mFileListAdapter = new FileDtoListAdapter(getContext(), R.layout.file_list_item, new ArrayList<>());
         mFileListView.setAdapter(mFileListAdapter);
@@ -176,6 +180,19 @@ public class HomeFragment extends Fragment {
         new GetDefaultProfileTask().execute(defaultProfile != null);
 
         return fragmentView;
+    }
+
+    private void resetUI() {
+        mFab.setEnabled(true);
+        mProgressBar.setVisibility(View.GONE);
+        mProgressBar.setProgress(0);
+        mFileListView.setVisibility(View.GONE);
+        mFileCountTextView.setVisibility(View.GONE);
+        mFileCountTextView.setText("");
+        mClearButton.setVisibility(View.GONE);
+
+        mFileListAdapter.clear();
+        mFileListAdapter.notifyDataSetChanged();
     }
 
     private void performFolderSearch() {
@@ -191,9 +208,9 @@ public class HomeFragment extends Fragment {
             if (resultData != null) {
                 Uri selectedFolderUri = resultData.getData();
                 Log.d(RECMAN_TAG, "Uri: " + selectedFolderUri.toString());
-                selectedFolderPath = FileUtils.getFullPathFromTreeUri(selectedFolderUri, getActivity());
+                mSelectedFolderPath = FileUtils.getFullPathFromTreeUri(selectedFolderUri, getActivity());
 
-                selectedFolderTextView.setText(selectedFolderPath);
+                mSelectedFolderTextView.setText(mSelectedFolderPath);
             }
         }
     }
@@ -230,14 +247,13 @@ public class HomeFragment extends Fragment {
             mListener.setUpConversionIntent(fileToConvert.getPath(), audioFormat, fileId, fileToConvertCount);
         }
 
-        mProgressFraction = (int)Math.ceil(100 / (2 * (double)fileToConvertCount));
+        mProgressFraction = (int) Math.ceil(100 / (2 * (double) fileToConvertCount));
 
         showProgressUI(fileToConvertCount, fileDtos);
     }
 
     private void showProgressUI(int fileToConvertCount, ArrayList<FileDto> fileDtos) {
         mFab.setEnabled(false);
-        mTotalProgressTextView.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.VISIBLE);
         mProgressBar.setProgress(0);
         mFileListView.setVisibility(View.VISIBLE);
@@ -254,11 +270,12 @@ public class HomeFragment extends Fragment {
     }
 
     public void onOperationCompleted(int resultCode, int fileId, int totalFileCount) {
+        String fileCountString = getString(R.string.files_count, fileId, totalFileCount);
+        mFileCountTextView.setText(fileCountString);
+
         FileDto fileDto = mFileListAdapter.getItem(fileId);
         int currentProgress = mProgressBar.getProgress();
 
-        String fileCountString = getString(R.string.files_count, fileId, totalFileCount);
-        mFileCountTextView.setText(fileCountString);
         switch (resultCode) {
             case RESULT_CONVERSION_OK:
                 fileDto.progress = 50;
@@ -266,20 +283,25 @@ public class HomeFragment extends Fragment {
                 break;
             case RESULT_CONVERSION_FAILED:
                 fileDto.hasError = true;
+                mProgressBar.setProgress(currentProgress + mProgressFraction);
+                mClearButton.setVisibility(View.VISIBLE);
                 break;
             case RESULT_UPLOAD_OK:
                 fileDto.progress = 100;
                 mProgressBar.setProgress(currentProgress + mProgressFraction);
                 if (fileId == totalFileCount) {
+                    mFab.setEnabled(true);
+                    mClearButton.setVisibility(View.VISIBLE);
                     String toastText = getString(R.string.finish_description, totalFileCount);
                     Toast.makeText(getContext(), toastText, Toast.LENGTH_LONG).show();
-                    mFab.setEnabled(true);
                 }
                 break;
             case RESULT_UPLOAD_FAILED:
                 fileDto.hasError = true;
+                mClearButton.setVisibility(View.VISIBLE);
                 break;
         }
+
         mFileListAdapter.notifyDataSetChanged();
     }
 
@@ -319,8 +341,8 @@ public class HomeFragment extends Fragment {
                 Spinner audioFormatSpinner = fragmentView.findViewById(R.id.audioFormatSpinner);
                 audioFormatSpinner.setSelection(mAudioFormatAdapter.getPosition(defaultProfile.getAudioFormat()), true);
 
-                selectedFolderTextView.setText(defaultProfile.getSourceFolder());
-                selectedFolderPath = defaultProfile.getSourceFolder();
+                mSelectedFolderTextView.setText(defaultProfile.getSourceFolder());
+                mSelectedFolderPath = defaultProfile.getSourceFolder();
             }
         }
     }
