@@ -232,9 +232,14 @@ public class HomeFragment extends Fragment {
 
         mProgressFraction = (int)Math.ceil(100 / (2 * (double)fileToConvertCount));
 
+        showProgressUI(fileToConvertCount, fileDtos);
+    }
+
+    private void showProgressUI(int fileToConvertCount, ArrayList<FileDto> fileDtos) {
         mFab.setEnabled(false);
         mTotalProgressTextView.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setProgress(0);
         mFileListView.setVisibility(View.VISIBLE);
         mFileCountTextView.setVisibility(View.VISIBLE);
         String fileCountString = getString(R.string.files_count, 0, fileToConvertCount);
@@ -248,7 +253,7 @@ public class HomeFragment extends Fragment {
         mFileListAdapter.notifyDataSetChanged();
     }
 
-    public void showProgressUI(int resultCode, int fileId, int totalFileCount) {
+    public void onOperationCompleted(int resultCode, int fileId, int totalFileCount) {
         FileDto fileDto = mFileListAdapter.getItem(fileId);
         int currentProgress = mProgressBar.getProgress();
 

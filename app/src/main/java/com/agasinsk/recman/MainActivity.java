@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity
                 int fileId = resultData.getInt(BundleConstants.FILE_ID);
                 int fileCount = resultData.getInt(BundleConstants.FILE_TOTAL_COUNT);
                 enqueueFileUploadIntent(filePath, fileId, fileCount);
-                mHomeFragment.showProgressUI(resultCode, fileId, fileCount);
+                mHomeFragment.onOperationCompleted(resultCode, fileId, fileCount);
                 break;
             case RESULT_CONVERSION_FAILED:
                 showProgressUI(resultCode, resultData);
@@ -366,6 +366,6 @@ public class MainActivity extends AppCompatActivity
     private void showProgressUI(int resultCode, Bundle resultData) {
         int fileId = resultData.getInt(BundleConstants.FILE_ID);
         int fileCount = resultData.getInt(BundleConstants.FILE_TOTAL_COUNT);
-        mHomeFragment.showProgressUI(resultCode, fileId, fileCount);
+        mHomeFragment.onOperationCompleted(resultCode, fileId, fileCount);
     }
 }
