@@ -1,6 +1,5 @@
-package com.agasinsk.recman;
+package com.agasinsk.recman.service;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,7 +35,7 @@ public class UploadJobService extends JobIntentService {
     /**
      * Convenience method for enqueuing work in to this service.
      */
-    static void enqueueWork(Context context, Intent work) {
+    public static void enqueueWork(Context context, Intent work) {
         mContext = context;
         enqueueWork(context, UploadJobService.class, FILE_UPLOAD_JOB_ID, work);
     }

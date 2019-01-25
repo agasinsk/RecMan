@@ -50,10 +50,10 @@
             android:name="com.microsoft.identity.client.ClientId"
             android:value="9aadc997-1173-42ca-a29e-d0b492bd2686" />
 
-        <service android:name=".ConversionJobService"
+        <service android:name=".service.ConversionJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false"/>
-        <service android:name=".UploadJobService"
+        <service android:name=".service.UploadJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false"/>
     </application>

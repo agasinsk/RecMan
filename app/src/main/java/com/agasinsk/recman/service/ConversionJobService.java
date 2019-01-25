@@ -1,4 +1,4 @@
-package com.agasinsk.recman;
+package com.agasinsk.recman.service;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,18 +7,18 @@ import android.os.ResultReceiver;
 import android.support.v4.app.JobIntentService;
 import android.util.Log;
 
+import com.agasinsk.recman.audioconverter.AndroidAudioConverter;
+import com.agasinsk.recman.audioconverter.IConvertCallback;
 import com.agasinsk.recman.helpers.BundleConstants;
+import com.agasinsk.recman.models.AudioFormat;
 
 import java.io.File;
-
-import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
-import cafe.adriel.androidaudioconverter.callback.IConvertCallback;
-import cafe.adriel.androidaudioconverter.model.AudioFormat;
 
 public class ConversionJobService extends JobIntentService {
     private static final String TAG = ConversionJobService.class.getSimpleName();
     public static final int RESULT_CONVERSION_OK = 122;
     public static final int RESULT_CONVERSION_FAILED = 123;
+    public static final int RESULT_CONVERSION_STARTED = 121;
 
     /**
      * Result receiver object to send results
@@ -33,7 +33,7 @@ public class ConversionJobService extends JobIntentService {
     /**
      * Convenience method for enqueuing work in to this service.
      */
-    static void enqueueWork(Context context, Intent work) {
+    public static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, ConversionJobService.class, AUDIO_CONVERSION_JOB_ID, work);
     }
 
@@ -62,6 +62,21 @@ public class ConversionJobService extends JobIntentService {
                     public void onFailure(Exception error) {
                         Log.e(TAG, "An error occurred during file conversion!", error);
                         sendResultWithBundle(RESULT_CONVERSION_FAILED, filePath, fileToConvert.getName(), fileId, fileCount);
+                    }
+
+                    @Override
+                    public void onStart() {
+                        sendResultWithBundle(RESULT_CONVERSION_STARTED, filePath, fileToConvert.getName(), fileId, fileCount);
+                    }
+
+                    @Override
+                    public void onFinish() {
+
+                    }
+
+                    @Override
+                    public void onProgress(String message) {
+
                     }
                 })
                 .convert();

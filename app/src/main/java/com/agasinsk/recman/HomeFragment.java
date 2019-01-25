@@ -32,10 +32,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.agasinsk.recman.ConversionJobService.RESULT_CONVERSION_FAILED;
-import static com.agasinsk.recman.ConversionJobService.RESULT_CONVERSION_OK;
-import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_FAILED;
-import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_OK;
+import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_FAILED;
+import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_OK;
+import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_STARTED;
+import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_FAILED;
+import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_OK;
 
 public class HomeFragment extends Fragment {
     private final String RECMAN_TAG = "RecMan:HomeFragment";
@@ -285,6 +286,10 @@ public class HomeFragment extends Fragment {
         FileDto fileDto = mFileListAdapter.getItem(fileId);
 
         switch (resultCode) {
+            case RESULT_CONVERSION_STARTED:
+                fileDto.setStarted(true);
+                mProgressBar.setProgress(currentProgress + mProgressFraction);
+                break;
             case RESULT_CONVERSION_OK:
                 fileDto.setProgress(50);
                 mProgressBar.setProgress(currentProgress + mProgressFraction);

@@ -1,4 +1,4 @@
-package com.agasinsk.recman;
+package com.agasinsk.recman.service;
 
 import android.os.Bundle;
 import android.os.Handler;

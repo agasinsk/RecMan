@@ -5,6 +5,16 @@ public class FileDto {
     String name;
     int progress;
 
+    public boolean isStarted() {
+        return isStarted;
+    }
+
+    public void setStarted(boolean started) {
+        isStarted = started;
+    }
+
+    boolean isStarted;
+
     public int getId() {
         return id;
     }

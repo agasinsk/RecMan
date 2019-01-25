@@ -22,6 +22,9 @@ import com.agasinsk.recman.helpers.ProfilesRepository;
 import com.agasinsk.recman.microsoft.graph.AuthenticationManager;
 import com.agasinsk.recman.microsoft.graph.MicrosoftAuthenticationCallback;
 import com.agasinsk.recman.models.Profile;
+import com.agasinsk.recman.service.ConversionJobService;
+import com.agasinsk.recman.service.ServiceResultReceiver;
+import com.agasinsk.recman.service.UploadJobService;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalException;
 import com.microsoft.identity.client.PublicClientApplication;
@@ -29,10 +32,11 @@ import com.microsoft.identity.client.User;
 
 import java.util.List;
 
-import static com.agasinsk.recman.ConversionJobService.RESULT_CONVERSION_FAILED;
-import static com.agasinsk.recman.ConversionJobService.RESULT_CONVERSION_OK;
-import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_FAILED;
-import static com.agasinsk.recman.UploadJobService.RESULT_UPLOAD_OK;
+import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_FAILED;
+import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_OK;
+import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_STARTED;
+import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_FAILED;
+import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_OK;
 
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener,
@@ -124,7 +128,7 @@ public class MainActivity extends AppCompatActivity
 
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.frame_container, fragment)
+                .replace(R.id.frame_container, fragment)
                 .addToBackStack(null)
                 .commit();
     }
@@ -336,6 +340,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
         switch (resultCode) {
+            case RESULT_CONVERSION_STARTED:
+                showProgressUI(resultCode, resultData);
+                break;
             case RESULT_CONVERSION_OK:
                 String filePath = resultData.getString(BundleConstants.FILE_PATH);
                 int fileId = resultData.getInt(BundleConstants.FILE_ID);

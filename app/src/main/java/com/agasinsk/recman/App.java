@@ -3,8 +3,8 @@ package com.agasinsk.recman;
 import android.app.Application;
 import android.util.Log;
 
-import cafe.adriel.androidaudioconverter.AndroidAudioConverter;
-import cafe.adriel.androidaudioconverter.callback.ILoadCallback;
+import com.agasinsk.recman.audioconverter.AndroidAudioConverter;
+import com.agasinsk.recman.audioconverter.ILoadCallback;
 
 public class App extends Application {
 
