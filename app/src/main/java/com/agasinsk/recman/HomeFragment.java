@@ -24,6 +24,8 @@ import android.widget.Toast;
 import com.agasinsk.recman.helpers.FileUtils;
 import com.agasinsk.recman.helpers.FilesHandler;
 import com.agasinsk.recman.helpers.ProfilesRepository;
+import com.agasinsk.recman.models.FileDto;
+import com.agasinsk.recman.models.Profile;
 
 import java.io.File;
 import java.io.IOException;
@@ -182,6 +184,11 @@ public class HomeFragment extends Fragment {
         return fragmentView;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
     private void resetUI() {
         mFab.setEnabled(true);
         mProgressBar.setVisibility(View.GONE);
@@ -279,16 +286,16 @@ public class HomeFragment extends Fragment {
 
         switch (resultCode) {
             case RESULT_CONVERSION_OK:
-                fileDto.progress = 50;
+                fileDto.setProgress(50);
                 mProgressBar.setProgress(currentProgress + mProgressFraction);
                 break;
             case RESULT_CONVERSION_FAILED:
-                fileDto.hasError = true;
+                fileDto.setHasError(true);
                 mProgressBar.setProgress(currentProgress + mProgressFraction);
                 mClearButton.setVisibility(View.VISIBLE);
                 break;
             case RESULT_UPLOAD_OK:
-                fileDto.progress = 100;
+                fileDto.setProgress(100);
                 mProgressBar.setProgress(currentProgress + mProgressFraction);
                 if (fileId == totalFileCount) {
                     mFab.setEnabled(true);
@@ -298,7 +305,7 @@ public class HomeFragment extends Fragment {
                 }
                 break;
             case RESULT_UPLOAD_FAILED:
-                fileDto.hasError = true;
+                fileDto.setHasError(true);
                 mClearButton.setVisibility(View.VISIBLE);
                 break;
         }

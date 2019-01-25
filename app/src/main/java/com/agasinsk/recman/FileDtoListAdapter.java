@@ -12,6 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.agasinsk.recman.models.FileDto;
+
 import java.util.ArrayList;
 
 public class FileDtoListAdapter extends ArrayAdapter<FileDto> {
@@ -47,10 +49,10 @@ public class FileDtoListAdapter extends ArrayAdapter<FileDto> {
         }
 
         TextView name = listItem.findViewById(R.id.fileNameTextView);
-        name.setText(fileDto.name);
+        name.setText(fileDto.getName());
 
         ProgressBar fileProgress = listItem.findViewById(R.id.fileProgressBar);
-        if (fileDto.progress == 0) {
+        if (fileDto.getProgress() == 0) {
             fileProgress.setIndeterminate(true);
             return listItem;
         }
@@ -58,12 +60,12 @@ public class FileDtoListAdapter extends ArrayAdapter<FileDto> {
             fileProgress.setIndeterminate(false);
         }
 
-        if (fileDto.hasError) {
+        if (fileDto.hasError()) {
             fileProgress.setProgress(100, true);
             fileProgress.getProgressDrawable().setColorFilter(
                     Color.RED, android.graphics.PorterDuff.Mode.SRC_IN);
         } else {
-            fileProgress.setProgress(fileDto.progress, true);
+            fileProgress.setProgress(fileDto.getProgress(), true);
         }
         return listItem;
     }

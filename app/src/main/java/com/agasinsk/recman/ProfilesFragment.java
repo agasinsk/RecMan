@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.agasinsk.recman.helpers.ProfilesRepository;
+import com.agasinsk.recman.models.Profile;
 
 import java.util.ArrayList;
 import java.util.List;

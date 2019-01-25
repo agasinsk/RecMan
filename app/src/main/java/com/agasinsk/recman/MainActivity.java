@@ -21,6 +21,7 @@ import com.agasinsk.recman.helpers.BundleConstants;
 import com.agasinsk.recman.helpers.ProfilesRepository;
 import com.agasinsk.recman.microsoft.graph.AuthenticationManager;
 import com.agasinsk.recman.microsoft.graph.MicrosoftAuthenticationCallback;
+import com.agasinsk.recman.models.Profile;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalException;
 import com.microsoft.identity.client.PublicClientApplication;
@@ -123,7 +124,7 @@ public class MainActivity extends AppCompatActivity
 
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frame_container, fragment)
+                .add(R.id.frame_container, fragment)
                 .addToBackStack(null)
                 .commit();
     }

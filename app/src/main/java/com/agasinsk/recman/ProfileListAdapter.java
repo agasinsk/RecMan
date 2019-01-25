@@ -11,6 +11,8 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.agasinsk.recman.models.Profile;
+
 import java.util.ArrayList;
 
 class ProfileListAdapter extends ArrayAdapter<Profile> {
@@ -45,20 +47,20 @@ class ProfileListAdapter extends ArrayAdapter<Profile> {
         }
 
         CheckBox isDefaultCheckBox = listItem.findViewById(R.id.isDefaultCheckBox);
-        isDefaultCheckBox.setChecked(currentProfile.isDefault);
+        isDefaultCheckBox.setChecked(currentProfile.isDefault());
         isDefaultCheckBox.setEnabled(false);
 
         TextView name = listItem.findViewById(R.id.profileNameTextView);
-        name.setText(currentProfile.name);
+        name.setText(currentProfile.getName());
 
         TextView source = listItem.findViewById(R.id.profileSourceTextView);
-        source.setText(currentProfile.sourceFolder);
+        source.setText(currentProfile.getSourceFolder());
 
         TextView fileHandling = listItem.findViewById(R.id.profileFileHandlingTextView);
-        fileHandling.setText(currentProfile.fileHandling);
+        fileHandling.setText(currentProfile.getFileHandling());
 
         TextView audioFormat = listItem.findViewById(R.id.profileAudioFormatTextView);
-        audioFormat.setText(currentProfile.audioFormat);
+        audioFormat.setText(currentProfile.getAudioFormat());
 
         return listItem;
     }

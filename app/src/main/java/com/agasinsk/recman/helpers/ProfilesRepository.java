@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.agasinsk.recman.Profile;
+import com.agasinsk.recman.models.Profile;
 
 import java.util.ArrayList;
 
