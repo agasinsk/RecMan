@@ -261,6 +261,8 @@ public class HomeFragment extends Fragment {
             if (fileToConvertCount == 0) {
                 Log.e(RECMAN_TAG, "No files were found to be converted!");
                 Toast.makeText(getContext(), "No files were found to be converted!", Toast.LENGTH_SHORT).show();
+                resetUI();
+                return;
             }
         } catch (IOException e) {
             Log.e(RECMAN_TAG, "An error occurred while selecting files!", e);
