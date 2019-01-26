@@ -38,7 +38,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/audioDetailsSpinner"
         app:layout_constraintStart_toEndOf="@+id/audioFormatTextView"
         app:layout_constraintTop_toBottomOf="@+id/fileHandlingSpinner" />
 
@@ -126,6 +126,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:progressTint="@color/design_default_color_primary"
+        android:indeterminateTint="@color/design_default_color_primary"
+        android:indeterminateTintMode="src_in"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -170,6 +172,17 @@
         app:layout_constraintBottom_toBottomOf="@+id/saveProfileButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/saveProfileButton" />
+
+    <Spinner
+        android:id="@+id/audioDetailsSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/audioFormatTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fileHandlingSpinner" />
 
 </android.support.constraint.ConstraintLayout>
 

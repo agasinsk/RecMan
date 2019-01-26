@@ -8,6 +8,7 @@ public class Profile {
     String sourceFolder;
     String fileHandling;
     String audioFormat;
+    String audioDetails;
     boolean isDefault;
 
     public Profile(int id, String name, String sourceFolder, String fileHandling, String audioFormat, boolean isDefault) {
@@ -19,16 +20,41 @@ public class Profile {
         this.isDefault = isDefault;
     }
 
+    public Profile(int id, String name, String sourceFolder, String fileHandling, String audioFormat, String audioDetails, boolean isDefault) {
+        this.id = id;
+        this.name = name;
+        this.sourceFolder = sourceFolder;
+        this.fileHandling = fileHandling;
+        this.audioFormat = audioFormat;
+        this.audioDetails = audioDetails;
+        this.isDefault = isDefault;
+    }
+
     public Profile(String sourceFolder, String fileHandling, String audioFormat) {
         this.sourceFolder = sourceFolder;
         this.fileHandling = fileHandling;
         this.audioFormat = audioFormat;
     }
 
+    public Profile(String sourceFolder, String fileHandling, String audioFormat, String audioDetails) {
+        this.sourceFolder = sourceFolder;
+        this.fileHandling = fileHandling;
+        this.audioFormat = audioFormat;
+        this.audioDetails = audioDetails;
+    }
+
     @NonNull
     @Override
     public String toString() {
         return this.name + " " + this.sourceFolder + " " + this.fileHandling + " " + this.audioFormat;
+    }
+
+    public String getAudioDetails() {
+        return audioDetails;
+    }
+
+    public void setAudioDetails(String audioDetails) {
+        this.audioDetails = audioDetails;
     }
 
     public int getId() {

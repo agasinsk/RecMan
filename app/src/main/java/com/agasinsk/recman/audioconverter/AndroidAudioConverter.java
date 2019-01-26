@@ -18,6 +18,7 @@ public class AndroidAudioConverter {
     private File audioFile;
     private AudioFormat format;
     private IConvertCallback callback;
+    private int bitrate;
 
     private AndroidAudioConverter(Context context) {
         this.context = context;
@@ -69,6 +70,14 @@ public class AndroidAudioConverter {
 
     public AndroidAudioConverter setFormat(AudioFormat format) {
         this.format = format;
+        return this;
+    }
+
+    public AndroidAudioConverter setBitrate(int bitrate) {
+        if (this.format != null && format == AudioFormat.MP3) {
+            this.bitrate = bitrate;
+        }
+
         return this;
     }
 

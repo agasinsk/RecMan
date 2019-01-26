@@ -25,6 +25,13 @@
         <item>WMA</item>
     </string-array>
 
+    <string-array name="audio_details">
+        <item>128</item>
+        <item>192</item>
+        <item>256</item>
+        <item>320</item>
+    </string-array>
+
     <string name="title_home">Home</string>
     <string name="title_profiles">Profiles</string>
     <string name="title_account">Account</string>

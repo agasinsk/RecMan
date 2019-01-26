@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -60,10 +61,12 @@ public class HomeFragment extends Fragment {
 
     private ArrayAdapter<CharSequence> mFileHandlingAdapter;
     private ArrayAdapter<CharSequence> mAudioFormatAdapter;
+    private ArrayAdapter<CharSequence> mAudioDetailsAdapter;
 
     private FileDtoListAdapter mFileListAdapter;
     private int mProgressFraction;
     private Button mClearButton;
+    private Spinner mAudioDetailsSpinner;
 
     public HomeFragment() {
     }
@@ -124,6 +127,15 @@ public class HomeFragment extends Fragment {
         final Button selectFolderButton = fragmentView.findViewById(R.id.folderButton);
         selectFolderButton.setOnClickListener(v -> performFolderSearch());
 
+        /* Setup spinner for audio details */
+        mAudioDetailsSpinner = fragmentView.findViewById(R.id.audioDetailsSpinner);
+        mAudioDetailsAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.audio_details, android.R.layout.simple_spinner_item);
+
+        mAudioDetailsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mAudioDetailsSpinner.setAdapter(mAudioDetailsAdapter);
+        mAudioDetailsSpinner.setVisibility(View.GONE);
+
         /* Setup spinner for audio formats */
         final Spinner audioFormatSpinner = fragmentView.findViewById(R.id.audioFormatSpinner);
         mAudioFormatAdapter = ArrayAdapter.createFromResource(getActivity(),
@@ -131,6 +143,28 @@ public class HomeFragment extends Fragment {
 
         mAudioFormatAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         audioFormatSpinner.setAdapter(mAudioFormatAdapter);
+
+        audioFormatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                String audioFormat = audioFormatSpinner.getSelectedItem().toString();
+                if (audioFormat.equals("MP3")) {
+                    mAudioDetailsSpinner.setVisibility(View.VISIBLE);
+                } else {
+                    mAudioDetailsSpinner.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                String audioFormat = audioFormatSpinner.getSelectedItem().toString();
+                if (audioFormat.equals("MP3")) {
+                    mAudioDetailsSpinner.setVisibility(View.VISIBLE);
+                } else {
+                    mAudioDetailsSpinner.setVisibility(View.GONE);
+                }
+            }
+        });
 
         /* Setup spinner for file handling */
         final Spinner fileHandlingSpinner = fragmentView.findViewById(R.id.fileHandlingSpinner);
@@ -147,6 +181,7 @@ public class HomeFragment extends Fragment {
             } else {
                 String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
                 String audioFormat = audioFormatSpinner.getSelectedItem().toString();
+                String audioDetails = mAudioDetailsSpinner.getSelectedItem().toString();
 
                 mProfileToSave = new Profile(mSelectedFolderPath, fileHandling, audioFormat);
                 mListener.askForProfileName();
@@ -165,7 +200,8 @@ public class HomeFragment extends Fragment {
             if (mListener.checkIfUserIsAuthenticated()) {
                 String fileHandling = fileHandlingSpinner.getSelectedItem().toString();
                 String audioFormat = audioFormatSpinner.getSelectedItem().toString();
-                convertAudioFiles(mSelectedFolderPath, fileHandling, audioFormat);
+                String audioDetails = mAudioDetailsSpinner.getSelectedItem().toString();
+                convertAudioFiles(mSelectedFolderPath, fileHandling, audioFormat, audioDetails);
             } else {
                 Toast.makeText(getContext(), R.string.toast_user_not_found_error, Toast.LENGTH_SHORT).show();
                 mListener.onSilentAuthenticationFailed();
@@ -230,7 +266,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void convertAudioFiles(String folderPath, String fileHandling, String audioFormat) {
+    private void convertAudioFiles(String folderPath, String fileHandling, String audioFormat, String audioDetails) {
         File directory = new File(folderPath);
         List<File> filesToConvert = new ArrayList<>();
 
@@ -288,7 +324,6 @@ public class HomeFragment extends Fragment {
         switch (resultCode) {
             case RESULT_CONVERSION_STARTED:
                 fileDto.setStarted(true);
-                mProgressBar.setProgress(currentProgress + mProgressFraction);
                 break;
             case RESULT_CONVERSION_OK:
                 fileDto.setProgress(50);
