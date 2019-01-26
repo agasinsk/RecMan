@@ -5,7 +5,7 @@ import android.content.Context;
 import com.agasinsk.recman.models.AudioFormat;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
-import com.github.hiteshsondhi88.libffmpeg.FFmpegLoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class AndroidAudioConverter {
 
     public static void load(Context context, final ILoadCallback callback) {
         try {
-            FFmpeg.getInstance(context).loadBinary(new FFmpegLoadBinaryResponseHandler() {
+            FFmpeg.getInstance(context).loadBinary(new LoadBinaryResponseHandler() {
                 @Override
                 public void onStart() {
 
@@ -100,8 +100,8 @@ public class AndroidAudioConverter {
             return;
         }
         final File convertedFile = getConvertedFile(audioFile, format);
-        final String bitrate = getDetailsString(format, details);
-        final String[] command = new String[]{"-y", "-i", audioFile.getPath(), convertedFile.getPath(), bitrate};
+
+        final String[] command = getCommandString(audioFile.getPath(), convertedFile.getPath());
         try {
             FFmpeg.getInstance(context).execute(command, new FFmpegExecuteResponseHandler() {
                 @Override
@@ -130,15 +130,16 @@ public class AndroidAudioConverter {
                 }
             });
         } catch (Exception e) {
+            convertedFile.delete();
             callback.onFailure(e);
         }
     }
 
-    private String getDetailsString(AudioFormat format, String details) {
+    private String[] getCommandString(String sourceFile, String destinationFile) {
         if (format == AudioFormat.MP3) {
-            return "-b:a " + details + "k";
+            return new String[]{"-y", "-i", sourceFile, "-b:a", details + "k", destinationFile};
         }
-        return "";
+        return new String[]{"-y", "-i", sourceFile, destinationFile};
     }
 
     private static File getConvertedFile(File originalFile, AudioFormat format) {

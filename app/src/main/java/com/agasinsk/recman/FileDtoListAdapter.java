@@ -52,7 +52,7 @@ public class FileDtoListAdapter extends ArrayAdapter<FileDto> {
         name.setText(fileDto.getName());
 
         ProgressBar fileProgress = listItem.findViewById(R.id.fileProgressBar);
-        if (fileDto.isStarted() && fileDto.getProgress() == 0) {
+        if (fileDto.isStarted() && fileDto.getProgress() == 0 && !fileDto.hasError()) {
             fileProgress.setIndeterminate(true);
             return listItem;
         } else {
@@ -66,6 +66,7 @@ public class FileDtoListAdapter extends ArrayAdapter<FileDto> {
         } else {
             fileProgress.setProgress(fileDto.getProgress(), true);
         }
+
         return listItem;
     }
 }

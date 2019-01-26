@@ -1,9 +1,7 @@
 package com.agasinsk.recman;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,7 +20,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.agasinsk.recman.helpers.FileUtils;
 import com.agasinsk.recman.helpers.FilesHandler;
 import com.agasinsk.recman.helpers.ProfilesRepository;
 import com.agasinsk.recman.models.FileDto;
@@ -48,6 +45,7 @@ public class HomeFragment extends Fragment {
 
     private Profile defaultProfile;
     private Profile mProfileToSave;
+    private int mFilesWithError;
 
     private ProfilesRepository mProfilesRepository;
     private FilesHandler mFilesHandler;
@@ -291,7 +289,7 @@ public class HomeFragment extends Fragment {
         mFileCountTextView.setText(fileCountString);
 
         String descriptionText = getString(R.string.conversion_description, fileToConvertCount);
-        Toast.makeText(getContext(), descriptionText, Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), descriptionText, Toast.LENGTH_SHORT).show();
 
         mFileListAdapter.clear();
         mFileListAdapter.addAll(fileDtos);
@@ -316,7 +314,8 @@ public class HomeFragment extends Fragment {
                 break;
             case RESULT_CONVERSION_FAILED:
                 fileDto.setHasError(true);
-                mProgressBar.setProgress(currentProgress + mProgressFraction);
+                mFilesWithError++;
+                mProgressBar.setProgress(currentProgress + 2 * mProgressFraction);
                 mClearButton.setVisibility(View.VISIBLE);
                 break;
             case RESULT_UPLOAD_OK:
@@ -331,8 +330,16 @@ public class HomeFragment extends Fragment {
                 break;
             case RESULT_UPLOAD_FAILED:
                 fileDto.setHasError(true);
+                mFilesWithError++;
                 mClearButton.setVisibility(View.VISIBLE);
                 break;
+        }
+
+        if (mFilesWithError == totalFileCount) {
+            Toast.makeText(getContext(), R.string.toast_conversion_error, Toast.LENGTH_LONG).show();
+            mProgressBar.setProgress(100, true);
+            mProgressBar.getProgressDrawable().setColorFilter(
+                    Color.RED, android.graphics.PorterDuff.Mode.SRC_IN);
         }
 
         mFileListAdapter.notifyDataSetChanged();
