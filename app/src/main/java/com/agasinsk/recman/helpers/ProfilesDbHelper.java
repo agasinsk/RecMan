@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 class ProfilesDbHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "RecManProfiles.db";
 
     private static final String SQL_CREATE_ENTRIES =
@@ -16,6 +16,7 @@ class ProfilesDbHelper extends SQLiteOpenHelper {
                     ProfilesContract.Profile.COLUMN_NAME_SOURCE_FOLDER + " TEXT," +
                     ProfilesContract.Profile.COLUMN_NAME_FILE_HANDLING + " TEXT," +
                     ProfilesContract.Profile.COLUMN_NAME_AUDIO_FORMAT + " TEXT," +
+                    ProfilesContract.Profile.COLUMN_NAME_AUDIO_DETAILS + " TEXT," +
                     ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT + " TEXT)";
 
     private static final String SQL_DELETE_ENTRIES =

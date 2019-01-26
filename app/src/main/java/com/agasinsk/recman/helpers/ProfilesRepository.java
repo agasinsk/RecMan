@@ -54,9 +54,10 @@ public class ProfilesRepository {
             String sourceFolder = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_SOURCE_FOLDER));
             String fileHandling = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_FILE_HANDLING));
             String audioFormat = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_AUDIO_FORMAT));
+            String audioDetails = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_AUDIO_DETAILS));
             boolean isDefault = cursor.getInt(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT)) > 0;
 
-            profile = new Profile(id, profileName, sourceFolder, fileHandling, audioFormat, isDefault);
+            profile = new Profile(id, profileName, sourceFolder, fileHandling, audioFormat, audioDetails, isDefault);
         }
         cursor.close();
 
@@ -83,9 +84,10 @@ public class ProfilesRepository {
             String sourceFolder = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_SOURCE_FOLDER));
             String fileHandling = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_FILE_HANDLING));
             String audioFormat = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_AUDIO_FORMAT));
+            String audioDetails = cursor.getString(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_AUDIO_DETAILS));
             boolean isDefault = cursor.getInt(cursor.getColumnIndexOrThrow(ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT)) > 0;
 
-            Profile profile = new Profile(id, profileName, sourceFolder, fileHandling, audioFormat, isDefault);
+            Profile profile = new Profile(id, profileName, sourceFolder, fileHandling, audioFormat, audioDetails, isDefault);
             dbProfiles.add(profile);
         }
         cursor.close();
@@ -130,7 +132,6 @@ public class ProfilesRepository {
         String[] selectionArgs = {String.valueOf(profileId)};
 
         return db.delete(ProfilesContract.Profile.TABLE_NAME, selection, selectionArgs);
-
     }
 
     public long saveProfile(Profile profileToSave) {
@@ -143,6 +144,7 @@ public class ProfilesRepository {
         values.put(ProfilesContract.Profile.COLUMN_NAME_SOURCE_FOLDER, profileToSave.getSourceFolder());
         values.put(ProfilesContract.Profile.COLUMN_NAME_FILE_HANDLING, profileToSave.getFileHandling());
         values.put(ProfilesContract.Profile.COLUMN_NAME_AUDIO_FORMAT, profileToSave.getAudioFormat());
+        values.put(ProfilesContract.Profile.COLUMN_NAME_AUDIO_DETAILS, profileToSave.getAudioDetails());
         values.put(ProfilesContract.Profile.COLUMN_NAME_IS_DEFAULT, false);
 
         // Insert the new row, returning the primary key value of the new row

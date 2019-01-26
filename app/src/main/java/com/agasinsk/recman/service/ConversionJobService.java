@@ -41,6 +41,7 @@ public class ConversionJobService extends JobIntentService {
     protected void onHandleWork(Intent intent) {
         Log.i(TAG, "Executing work: " + intent);
         String audioFormat = intent.getStringExtra(BundleConstants.AUDIO_FORMAT);
+        String audioDetails = intent.getStringExtra(BundleConstants.AUDIO_DETAILS);
         String filePath = intent.getStringExtra(BundleConstants.FILE_PATH);
         int fileId = intent.getIntExtra(BundleConstants.FILE_ID, 0);
         int fileCount = intent.getIntExtra(BundleConstants.FILE_TOTAL_COUNT, 0);
@@ -51,6 +52,7 @@ public class ConversionJobService extends JobIntentService {
         AndroidAudioConverter.with(getApplicationContext())
                 .setFile(fileToConvert)
                 .setFormat(AudioFormat.valueOf(audioFormat))
+                .setAudioFormatDetails(audioDetails)
                 .setCallback(new IConvertCallback() {
                     @Override
                     public void onSuccess(File convertedFile) {

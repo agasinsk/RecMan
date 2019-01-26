@@ -18,7 +18,7 @@ public class AndroidAudioConverter {
     private File audioFile;
     private AudioFormat format;
     private IConvertCallback callback;
-    private int bitrate;
+    private String details;
 
     private AndroidAudioConverter(Context context) {
         this.context = context;
@@ -73,9 +73,9 @@ public class AndroidAudioConverter {
         return this;
     }
 
-    public AndroidAudioConverter setBitrate(int bitrate) {
+    public AndroidAudioConverter setAudioFormatDetails(String audioFormatDetails) {
         if (this.format != null && format == AudioFormat.MP3) {
-            this.bitrate = bitrate;
+            this.details = audioFormatDetails;
         }
 
         return this;
@@ -100,7 +100,8 @@ public class AndroidAudioConverter {
             return;
         }
         final File convertedFile = getConvertedFile(audioFile, format);
-        final String[] command = new String[]{"-y", "-i", audioFile.getPath(), convertedFile.getPath()};
+        final String bitrate = getDetailsString(format, details);
+        final String[] command = new String[]{"-y", "-i", audioFile.getPath(), convertedFile.getPath(), bitrate};
         try {
             FFmpeg.getInstance(context).execute(command, new FFmpegExecuteResponseHandler() {
                 @Override
@@ -131,6 +132,13 @@ public class AndroidAudioConverter {
         } catch (Exception e) {
             callback.onFailure(e);
         }
+    }
+
+    private String getDetailsString(AudioFormat format, String details) {
+        if (format == AudioFormat.MP3) {
+            return "-b:a " + details + "k";
+        }
+        return "";
     }
 
     private static File getConvertedFile(File originalFile, AudioFormat format) {

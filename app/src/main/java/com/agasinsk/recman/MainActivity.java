@@ -1,8 +1,10 @@
 package com.agasinsk.recman;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -18,6 +20,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.agasinsk.recman.helpers.BundleConstants;
+import com.agasinsk.recman.helpers.FileUtils;
 import com.agasinsk.recman.helpers.ProfilesRepository;
 import com.agasinsk.recman.microsoft.graph.AuthenticationManager;
 import com.agasinsk.recman.microsoft.graph.MicrosoftAuthenticationCallback;
@@ -37,6 +40,7 @@ import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION
 import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_STARTED;
 import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_FAILED;
 import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_OK;
+import static com.agasinsk.recman.HomeFragment.SOURCE_FOLDER_REQUEST_CODE;
 
 public class MainActivity extends AppCompatActivity
         implements HomeFragment.OnFragmentInteractionListener,
@@ -239,16 +243,33 @@ public class MainActivity extends AppCompatActivity
      * dialog
      */
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+
+        if (requestCode == SOURCE_FOLDER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            if (resultData != null) {
+                Uri selectedFolderUri = resultData.getData();
+                Log.d(RECMAN_TAG, "Uri: " + selectedFolderUri.toString());
+                String selectedFolderPath = FileUtils.getFullPathFromTreeUri(selectedFolderUri, this);
+
+                mHomeFragment.onFolderSelected(selectedFolderPath);
+                return;
+            }
+        }
 
         PublicClientApplication publicClient = AuthenticationManager
                 .getInstance(getApplicationContext())
                 .getPublicClient();
 
         if (publicClient != null) {
-            publicClient.handleInteractiveRequestRedirect(requestCode, resultCode, data);
+            publicClient.handleInteractiveRequestRedirect(requestCode, resultCode, resultData);
         }
+    }
+
+    @Override
+    public void performFolderSearch() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        startActivityForResult(intent, SOURCE_FOLDER_REQUEST_CODE);
     }
 
     @Override
@@ -263,9 +284,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void setUpConversionIntent(String filePath, String audioFormat, int fileId, int totalFileCount) {
+    public void setUpConversionIntent(String filePath, String audioFormat, String audioDetails, int fileId, int totalFileCount) {
         Intent conversionIntent = new Intent(this, ConversionJobService.class);
         conversionIntent.putExtra(BundleConstants.AUDIO_FORMAT, audioFormat);
+        conversionIntent.putExtra(BundleConstants.AUDIO_DETAILS, audioDetails);
         conversionIntent.putExtra(BundleConstants.RECEIVER, mServiceResultReceiver);
         conversionIntent.putExtra(BundleConstants.FILE_PATH, filePath);
         conversionIntent.putExtra(BundleConstants.FILE_ID, fileId);

@@ -41,7 +41,7 @@ import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_OK;
 
 public class HomeFragment extends Fragment {
     private final String RECMAN_TAG = "RecMan:HomeFragment";
-    private final int SOURCE_FOLDER_REQUEST_CODE = 100;
+    static final int SOURCE_FOLDER_REQUEST_CODE = 100;
 
     private String mSelectedFolderPath = "";
     private TextView mSelectedFolderTextView;
@@ -125,7 +125,7 @@ public class HomeFragment extends Fragment {
         // Setup source folder selection
         mSelectedFolderTextView = fragmentView.findViewById(R.id.selectedFolder);
         final Button selectFolderButton = fragmentView.findViewById(R.id.folderButton);
-        selectFolderButton.setOnClickListener(v -> performFolderSearch());
+        selectFolderButton.setOnClickListener(v -> mListener.performFolderSearch());
 
         /* Setup spinner for audio details */
         mAudioDetailsSpinner = fragmentView.findViewById(R.id.audioDetailsSpinner);
@@ -183,7 +183,7 @@ public class HomeFragment extends Fragment {
                 String audioFormat = audioFormatSpinner.getSelectedItem().toString();
                 String audioDetails = mAudioDetailsSpinner.getSelectedItem().toString();
 
-                mProfileToSave = new Profile(mSelectedFolderPath, fileHandling, audioFormat);
+                mProfileToSave = new Profile(mSelectedFolderPath, fileHandling, audioFormat, audioDetails);
                 mListener.askForProfileName();
             }
         });
@@ -239,24 +239,9 @@ public class HomeFragment extends Fragment {
         mFileListAdapter.notifyDataSetChanged();
     }
 
-    private void performFolderSearch() {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-        startActivityForResult(intent, SOURCE_FOLDER_REQUEST_CODE);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode,
-                                 Intent resultData) {
-
-        if (requestCode == SOURCE_FOLDER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            if (resultData != null) {
-                Uri selectedFolderUri = resultData.getData();
-                Log.d(RECMAN_TAG, "Uri: " + selectedFolderUri.toString());
-                mSelectedFolderPath = FileUtils.getFullPathFromTreeUri(selectedFolderUri, getActivity());
-
-                mSelectedFolderTextView.setText(mSelectedFolderPath);
-            }
-        }
+    public void onFolderSelected(String selectedFolder) {
+        mSelectedFolderPath = selectedFolder;
+        mSelectedFolderTextView.setText(mSelectedFolderPath);
     }
 
     public void saveProfileWithName(String profileName) {
@@ -288,7 +273,7 @@ public class HomeFragment extends Fragment {
             File fileToConvert = filesToConvert.get(i);
             int fileId = i + 1;
             fileDtos.add(new FileDto(fileId, fileToConvert.getName()));
-            mListener.setUpConversionIntent(fileToConvert.getPath(), audioFormat, fileId, fileToConvertCount);
+            mListener.setUpConversionIntent(fileToConvert.getPath(), audioFormat, audioDetails, fileId, fileToConvertCount);
         }
 
         mProgressFraction = (int) Math.ceil(100 / (2 * (double) fileToConvertCount));
@@ -354,13 +339,15 @@ public class HomeFragment extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
+        void performFolderSearch();
+
         void askForProfileName();
 
         void onSilentAuthenticationFailed();
 
         boolean checkIfUserIsAuthenticated();
 
-        void setUpConversionIntent(String path, String audioFormat, int fileId, int totalFileCount);
+        void setUpConversionIntent(String path, String audioFormat, String audioDetails, int fileId, int totalFileCount);
     }
 
     private class GetDefaultProfileTask extends AsyncTask<Boolean, Void, Profile> {
@@ -379,7 +366,7 @@ public class HomeFragment extends Fragment {
 
         protected void onPostExecute(Profile result) {
             ProgressBar progressBar = fragmentView.findViewById(R.id.homeProgressBar);
-            progressBar.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.GONE);
 
             if (result != null) {
                 defaultProfile = result;
@@ -388,6 +375,9 @@ public class HomeFragment extends Fragment {
 
                 Spinner audioFormatSpinner = fragmentView.findViewById(R.id.audioFormatSpinner);
                 audioFormatSpinner.setSelection(mAudioFormatAdapter.getPosition(defaultProfile.getAudioFormat()), true);
+
+                Spinner audioDetailsSpinner = fragmentView.findViewById(R.id.audioDetailsSpinner);
+                audioDetailsSpinner.setSelection(mAudioDetailsAdapter.getPosition(defaultProfile.getAudioDetails()), true);
 
                 mSelectedFolderTextView.setText(defaultProfile.getSourceFolder());
                 mSelectedFolderPath = defaultProfile.getSourceFolder();
