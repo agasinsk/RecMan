@@ -30,6 +30,7 @@
         <item>192</item>
         <item>256</item>
         <item>320</item>
+        <item>92</item>
     </string-array>
 
     <string name="title_home">Home</string>

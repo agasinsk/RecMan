@@ -232,6 +232,7 @@ public class HomeFragment extends Fragment {
         mFileCountTextView.setVisibility(View.GONE);
         mFileCountTextView.setText("");
         mClearButton.setVisibility(View.GONE);
+        mFilesWithError = 0;
 
         mFileListAdapter.clear();
         mFileListAdapter.notifyDataSetChanged();
