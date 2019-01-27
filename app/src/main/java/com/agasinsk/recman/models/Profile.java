@@ -30,12 +30,6 @@ public class Profile {
         this.isDefault = isDefault;
     }
 
-    public Profile(String sourceFolder, String fileHandling, String audioFormat) {
-        this.sourceFolder = sourceFolder;
-        this.fileHandling = fileHandling;
-        this.audioFormat = audioFormat;
-    }
-
     public Profile(String sourceFolder, String fileHandling, String audioFormat, String audioDetails) {
         this.sourceFolder = sourceFolder;
         this.fileHandling = fileHandling;
