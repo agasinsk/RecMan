@@ -17,7 +17,9 @@ import java.io.File;
 
 public class UploadJobService extends JobIntentService {
     private static final String TAG = UploadJobService.class.getSimpleName();
+    public static final int RESULT_UPLOAD_FILE_TOO_BIG = 126;
     private static Context mContext;
+    private static final int ONEDRIVE_FILE_SIZE_LIMIT = 4 * 1024 * 1024;
     public static final int RESULT_UPLOAD_OK = 124;
     public static final int RESULT_UPLOAD_FAILED = 125;
 
@@ -56,6 +58,12 @@ public class UploadJobService extends JobIntentService {
         mResultReceiver = intent.getParcelableExtra(BundleConstants.RECEIVER);
 
         File fileToUpload = new File(fileToUploadPath);
+
+        if (fileToUpload.length() > ONEDRIVE_FILE_SIZE_LIMIT) {
+            Log.e(TAG, "File " + fileToUpload.getName() + " is over 4MB and cannot be uploaded.");
+            removeFile(fileToUploadPath);
+            sendResultWithBundle(RESULT_UPLOAD_FILE_TOO_BIG, fileToUpload.getName(), fileId, fileCount);
+        }
         try {
             getGraphServiceController()
                     .uploadFileToOneDrive(fileToUpload, new ICallback<DriveItem>() {

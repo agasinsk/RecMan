@@ -34,6 +34,7 @@ import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION
 import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_OK;
 import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_STARTED;
 import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_FAILED;
+import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_FILE_TOO_BIG;
 import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_OK;
 
 public class HomeFragment extends Fragment {
@@ -321,13 +322,21 @@ public class HomeFragment extends Fragment {
                 mProgressBar.setProgress(currentProgress + 2 * mProgressFraction);
                 mClearButton.setVisibility(View.VISIBLE);
                 break;
+            case RESULT_UPLOAD_FILE_TOO_BIG:
+                fileDto.setHasError(true);
+                mFilesWithError++;
+                mProgressBar.setProgress(currentProgress + mProgressFraction);
+                mClearButton.setVisibility(View.VISIBLE);
+                String toastText = getString(R.string.file_size_too_big, fileDto.getName());
+                Toast.makeText(getContext(), toastText, Toast.LENGTH_SHORT).show();
+                break;
             case RESULT_UPLOAD_OK:
                 fileDto.setProgress(100);
                 mProgressBar.setProgress(currentProgress + mProgressFraction);
                 if (fileId == totalFileCount) {
                     mFab.setEnabled(true);
                     mClearButton.setVisibility(View.VISIBLE);
-                    String toastText = getString(R.string.finish_description, totalFileCount);
+                    toastText = getString(R.string.finish_description, totalFileCount);
                     Toast.makeText(getContext(), toastText, Toast.LENGTH_LONG).show();
                 }
                 break;
@@ -341,8 +350,6 @@ public class HomeFragment extends Fragment {
         if (mFilesWithError == totalFileCount) {
             Toast.makeText(getContext(), R.string.toast_conversion_error, Toast.LENGTH_LONG).show();
             mProgressBar.setProgress(100, true);
-            mProgressBar.getProgressDrawable().setColorFilter(
-                    Color.RED, android.graphics.PorterDuff.Mode.SRC_IN);
         }
 
         mFileListAdapter.notifyDataSetChanged();

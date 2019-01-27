@@ -39,6 +39,7 @@ import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION
 import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_OK;
 import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_STARTED;
 import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_FAILED;
+import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_FILE_TOO_BIG;
 import static com.agasinsk.recman.service.UploadJobService.RESULT_UPLOAD_OK;
 import static com.agasinsk.recman.HomeFragment.SOURCE_FOLDER_REQUEST_CODE;
 
@@ -373,6 +374,9 @@ public class MainActivity extends AppCompatActivity
                 mHomeFragment.onOperationCompleted(resultCode, fileId, fileCount);
                 break;
             case RESULT_CONVERSION_FAILED:
+                showProgressUI(resultCode, resultData);
+                break;
+            case RESULT_UPLOAD_FILE_TOO_BIG:
                 showProgressUI(resultCode, resultData);
                 break;
             case RESULT_UPLOAD_OK:
