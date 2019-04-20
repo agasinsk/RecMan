@@ -32,17 +32,14 @@ public class ProfilesFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static ProfilesFragment newInstance(ProfilesRepository mProfilesRepository) {
-        ProfilesFragment fragment = new ProfilesFragment();
-        fragment.setProfilesRepository(mProfilesRepository);
-        return fragment;
+    public static ProfilesFragment newInstance() {
+        return new ProfilesFragment();
     }
 
-    private void setProfilesRepository(ProfilesRepository mProfilesRepository) {
-        if (mProfilesRepository == null) {
-            this.mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
-        }
-        this.mProfilesRepository = mProfilesRepository;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
     }
 
     @Override

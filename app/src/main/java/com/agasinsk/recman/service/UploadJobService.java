@@ -42,7 +42,7 @@ public class UploadJobService extends JobIntentService {
         enqueueWork(context, UploadJobService.class, FILE_UPLOAD_JOB_ID, work);
     }
 
-    GraphServiceController getGraphServiceController() {
+    private GraphServiceController getGraphServiceController() {
         if (mGraphServiceController == null) {
             mGraphServiceController = new GraphServiceController(mContext);
         }

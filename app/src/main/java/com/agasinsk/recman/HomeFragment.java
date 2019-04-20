@@ -1,7 +1,6 @@
 package com.agasinsk.recman;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -70,22 +69,14 @@ public class HomeFragment extends Fragment {
     public HomeFragment() {
     }
 
-    public static HomeFragment newInstance(ProfilesRepository profilesRepository) {
-        return newInstance(null, profilesRepository);
+    public static HomeFragment newInstance() {
+        return newInstance(null);
     }
 
-    public static HomeFragment newInstance(Profile defaultProfile, ProfilesRepository profilesRepository) {
+    public static HomeFragment newInstance(Profile defaultProfile) {
         HomeFragment fragment = new HomeFragment();
         fragment.setDefaultProfile(defaultProfile);
-        fragment.setProfilesRepository(profilesRepository);
         return fragment;
-    }
-
-    private void setProfilesRepository(ProfilesRepository mProfilesRepository) {
-        if (mProfilesRepository == null) {
-            this.mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
-        }
-        this.mProfilesRepository = mProfilesRepository;
     }
 
     private void setDefaultProfile(Profile defaultProfile) {
@@ -113,6 +104,7 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFilesHandler = new FilesHandler();
+        mProfilesRepository = new ProfilesRepository(getActivity().getApplicationContext());
     }
 
     @Override
@@ -189,9 +181,7 @@ public class HomeFragment extends Fragment {
 
         // Setup CLEAR button
         mClearButton = fragmentView.findViewById(R.id.clearButton);
-        mClearButton.setOnClickListener(v -> {
-            resetUI();
-        });
+        mClearButton.setOnClickListener(v -> resetUI());
 
         // Setup FAB
         mFab = fragmentView.findViewById(R.id.goFab);
@@ -218,11 +208,6 @@ public class HomeFragment extends Fragment {
         new GetDefaultProfileTask().execute(defaultProfile != null);
 
         return fragmentView;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 
     private void resetUI() {

@@ -14,7 +14,7 @@ public class AndroidAudioConverter {
 
     private static boolean loaded;
 
-    private Context context;
+    private final Context context;
     private File audioFile;
     private AudioFormat format;
     private IConvertCallback callback;
@@ -24,7 +24,7 @@ public class AndroidAudioConverter {
         this.context = context;
     }
 
-    public static boolean isLoaded() {
+    private static boolean isLoaded() {
         return loaded;
     }
 

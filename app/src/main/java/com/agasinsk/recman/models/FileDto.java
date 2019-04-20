@@ -1,9 +1,9 @@
 package com.agasinsk.recman.models;
 
 public class FileDto {
-    int id;
-    String name;
-    int progress;
+    private int id;
+    private String name;
+    private int progress;
 
     public boolean isStarted() {
         return isStarted;
@@ -13,7 +13,7 @@ public class FileDto {
         isStarted = started;
     }
 
-    boolean isStarted;
+    private boolean isStarted;
 
     public int getId() {
         return id;
@@ -47,7 +47,7 @@ public class FileDto {
         this.hasError = hasError;
     }
 
-    boolean hasError;
+    private boolean hasError;
 
     public FileDto(int id, String name) {
         this.id = id;

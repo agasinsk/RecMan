@@ -2,6 +2,7 @@ package com.agasinsk.recman;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -33,6 +34,7 @@ import com.microsoft.identity.client.MsalException;
 import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.agasinsk.recman.service.ConversionJobService.RESULT_CONVERSION_FAILED;
@@ -51,10 +53,7 @@ public class MainActivity extends AppCompatActivity
         MicrosoftAuthenticationCallback,
         ServiceResultReceiver.Receiver {
 
-    private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 200;
-    private final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 201;
-    private final int PERMISSIONS_REQUEST_INTERNET = 202;
-    private final int PERMISSIONS_REQUEST_ACCESS_NETWORK_STATE = 203;
+    private final int PERMISSIONS_REQUEST_CODE = 200;
     private final String RECMAN_TAG = "RecMan:MainActivity";
     private boolean isUserAuthenticated;
 
@@ -76,7 +75,7 @@ public class MainActivity extends AppCompatActivity
         mBottomNavigation = findViewById(R.id.navigation);
         mBottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        loadFragment(HomeFragment.newInstance(mProfilesRepository));
+        loadFragment(HomeFragment.newInstance());
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
 
         mServiceResultReceiver = new ServiceResultReceiver(new Handler());
@@ -142,11 +141,11 @@ public class MainActivity extends AppCompatActivity
             = item -> {
         switch (item.getItemId()) {
             case R.id.navigation_home:
-                mHomeFragment = HomeFragment.newInstance(mProfilesRepository);
+                mHomeFragment = HomeFragment.newInstance();
                 loadFragment(mHomeFragment);
                 return true;
             case R.id.navigation_profiles:
-                mProfilesFragment = ProfilesFragment.newInstance(mProfilesRepository);
+                mProfilesFragment = ProfilesFragment.newInstance();
                 loadFragment(mProfilesFragment);
                 return true;
             case R.id.navigation_account:
@@ -158,14 +157,15 @@ public class MainActivity extends AppCompatActivity
     };
 
     private void checkForPermissions() {
+
+        List<String> permissionsToAskFor = new ArrayList<>();
+
         // Check for INTERNET permission
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.INTERNET)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.INTERNET},
-                    PERMISSIONS_REQUEST_INTERNET);
+            permissionsToAskFor.add(Manifest.permission.INTERNET);
         }
 
         // Check for ACCESS_NETWORK_STATE permission
@@ -173,9 +173,7 @@ public class MainActivity extends AppCompatActivity
                 Manifest.permission.ACCESS_NETWORK_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_NETWORK_STATE},
-                    PERMISSIONS_REQUEST_ACCESS_NETWORK_STATE);
+            permissionsToAskFor.add(Manifest.permission.ACCESS_NETWORK_STATE);
         }
 
         // Check for READ permission
@@ -183,57 +181,41 @@ public class MainActivity extends AppCompatActivity
                 Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+            permissionsToAskFor.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
 
         // Check for WRITE permission
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
+            permissionsToAskFor.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
 
+        if (permissionsToAskFor.size() > 0) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                    permissionsToAskFor.toArray(new String[0]),
+                    PERMISSIONS_REQUEST_CODE);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.i(RECMAN_TAG, "WRITE Permission granted");
-                } else {
-                    Log.e(RECMAN_TAG, "WRITE Permission denied");
+
+        if (requestCode == PERMISSIONS_REQUEST_CODE) {
+            for (int i = 0; i < grantResults.length; i++) {
+
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    if (shouldShowRequestPermissionRationale(permissions[i])) {
+                        new AlertDialog.Builder(this)
+                                .setMessage("Cannot work without permissions. Please grant them.")
+                                .setPositiveButton("Allow", (dialog, which) -> checkForPermissions())
+                                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                                .create()
+                                .show();
+                    }
+                    return;
                 }
-                break;
-            }
-            case PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.i(RECMAN_TAG, "READ Permission granted");
-                } else {
-                    Log.e(RECMAN_TAG, "READ Permission denied");
-                }
-                break;
-            }
-            case PERMISSIONS_REQUEST_INTERNET: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.i(RECMAN_TAG, "INTERNET Permission granted");
-                } else {
-                    Log.e(RECMAN_TAG, "INTERNET Permission denied");
-                }
-                break;
-            }
-            case PERMISSIONS_REQUEST_ACCESS_NETWORK_STATE: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.i(RECMAN_TAG, "ACCESS_NETWORK_STATE Permission granted");
-                } else {
-                    Log.e(RECMAN_TAG, "ACCESS_NETWORK_STATE Permission denied");
-                }
-                break;
             }
         }
     }
@@ -307,7 +289,7 @@ public class MainActivity extends AppCompatActivity
     public void onProfileSelected(Profile profile) {
         Log.d(RECMAN_TAG, "Profile selected with id: " + profile.getId());
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
-        mHomeFragment = HomeFragment.newInstance(profile, mProfilesRepository);
+        mHomeFragment = HomeFragment.newInstance(profile);
         loadFragment(mHomeFragment);
     }
 
@@ -327,7 +309,7 @@ public class MainActivity extends AppCompatActivity
         Log.d(RECMAN_TAG, "Successfully authenticated user " + userName);
         isUserAuthenticated = true;
         mBottomNavigation.setSelectedItemId(R.id.navigation_home);
-        mHomeFragment = HomeFragment.newInstance(mProfilesRepository);
+        mHomeFragment = HomeFragment.newInstance();
         loadFragment(mHomeFragment);
     }
 

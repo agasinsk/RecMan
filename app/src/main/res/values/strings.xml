@@ -1,6 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">RecMan</string>
-    <string name="action_profiles">Profiles</string>
     <string name="audio_format">Audio format</string>
     <string name="source_folder">Source folder</string>
     <string name="file_handling">File handling</string>
@@ -28,6 +27,7 @@
     <string-array name="audio_details">
         <item>128</item>
         <item>192</item>
+        <item>256</item>
         <item>92</item>
     </string-array>
 
@@ -37,7 +37,6 @@
     <string name="dialog_set_profile_name">Give a name to a new profile:</string>
     <string name="ok">OK</string>
     <string name="skip">Skip</string>
-    <string name="name_profile_hint">Type a name...</string>
 
     <string name="toast_profile_created">Profile successfully created!</string>
     <string name="toast_profile_set_default">Profile successfully set as default!</string>
@@ -46,13 +45,8 @@
     <string name="toast_connect_error">Error connecting to Microsoft Graph.</string>
     <string name="toast_conversion_error">An error occurred while converting audio file(s). Please try again.</string>
     <string name="files_count">Total progress: %1$d/%2$d files</string>
-    <string name="toast_conversion_started">We are converting your audio files. It may take a couple of minutes.</string>
     <string name="conversion_description">We found %1$d audio file(s) to convert. \nIt may take a couple of minutes.</string>
     <string name="finish_description">We have converted and uploaded %1$d audio file(s).</string>
-    <string name="toast_conversion_file_error">An error occurred while converting file %1$s. \nPlease try again.</string>
-    <string name="toast_conversion_finished">Successfully converted file %1$s.</string>
-    <string name="toast_upload_finished">Successfully uploaded file %1$s.</string>
-    <string name="toast_upload_file_error">An error occurred while uploading file %1$s. \nPlease try again.</string>
     <string name="toast_sign_out">You have been signed out.</string>
     <string name="no_profiles_yet">You don\'t have any profiles yet!</string>
     <string name="clear">Clear</string>
@@ -61,7 +55,6 @@
     <string name="sign_out_menu_item_text">Sign out</string>
     <string name="already_authenticated_text">\nYou\'re now connected to Microsoft Graph. Tap the Home button to go back to the Home screen and upload your files to OneDrive using the Microsoft Graph API.\n</string>
 
-    <string name="total_progress">Total progress</string>
     <string name="title_text_error">Oops!</string>
     <string name="toast_user_not_found_error">Sorry, can\'t find the user for this account.</string>
 

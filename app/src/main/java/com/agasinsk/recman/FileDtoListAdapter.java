@@ -16,7 +16,7 @@ import com.agasinsk.recman.models.FileDto;
 
 import java.util.ArrayList;
 
-public class FileDtoListAdapter extends ArrayAdapter<FileDto> {
+class FileDtoListAdapter extends ArrayAdapter<FileDto> {
 
     private final Context mContext;
     private final ArrayList<FileDto> mFiles;

@@ -4,12 +4,12 @@ import android.support.annotation.NonNull;
 
 public class Profile {
     private int id;
-    String name;
-    String sourceFolder;
-    String fileHandling;
-    String audioFormat;
-    String audioDetails;
-    boolean isDefault;
+    private String name;
+    private String sourceFolder;
+    private String fileHandling;
+    private String audioFormat;
+    private String audioDetails;
+    private boolean isDefault;
 
     public Profile(int id, String name, String sourceFolder, String fileHandling, String audioFormat, boolean isDefault) {
         this.id = id;
